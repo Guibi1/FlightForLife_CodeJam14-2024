@@ -11,14 +11,7 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 
 # Dictionary to store drone states and their respective models
 drones = {}
-
-
-# YOLO model initialization (modify if different per drone)
-def create_inference_model():
-    model = YOLO("yolo11n.pt")  # Load your YOLO model here
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    model.to(device)
-    return model
+alerts = []
 
 
 # Function to update drone data
@@ -46,15 +39,14 @@ def generate_frames():
             yield (b"--frame\r\n" b"Content-Type: image/jpeg\r\n\r\n" + frame + b"\r\n")
 
 
-@app.route("/drone/<string:drone_id>", methods=["GET"])
+@app.route("/drone/<int:drone_id>", methods=["GET"])
 def get_drone(drone_id):
     """
     Fetch the state of a specific drone by its ID.
     """
 
-
     # return get request from docker ai
-    
+
     drone_data = drones[drone_id]
     if drone_data:
         return Response(
@@ -87,36 +79,10 @@ class UnityNamespace(Namespace):
         socketio.emit("message", data, namespace="/unity")
 
     def on_positions(self, data):
+        for drone in data:
+            drone.alert = drone.id in alerts
+
         socketio.emit("drones", data, namespace="/frontend")
-
-    def on_drone_feed(self, data):
-        """
-        Handle incoming feed from a drone.
-        Data should include:
-        - `drone_id`: Unique identifier for the drone.
-        - `frame`: Current video frame data for inference.
-        """
-        drone_id = data.get("drone_id")
-        frame = data.get("frame")  # Replace with actual frame decoding logic
-
-        if not drone_id or frame is None:
-            socketio.emit("error", {"message": "Invalid data"}, namespace="/unity")
-            return
-
-        # Ensure the drone has a model assigned
-        if drone_id not in drones:
-            print(f"Creating model for drone {drone_id}.")
-            drones[drone_id] = {"model": create_inference_model(), "human_count": 0}
-
-        # Perform inference on the frame
-        model = drones[drone_id]["model"]
-        results = model(frame)  # Assuming frame is preprocessed appropriately
-        human_count = sum(
-            1 for box in results.boxes if box.cls == 0
-        )  # Adjust for human class
-
-        # Update the drone's state with the human count
-        update_drones(drone_id, human_count)
 
 
 # WebSocket event handler for client connections
@@ -142,8 +108,29 @@ class FrontendNamespace(Namespace):
         socketio.emit("abort_move_command", data, namespace="/unity")
 
 
+class AiNamespace(Namespace):
+    def on_connect(self):
+        print("Frontend client connected to /frontend")
+
+    def on_disconnect(self):
+        print("Frontend client disconnected from /frontend")
+
+    def on_message(self, data):
+        print(f"Frontend /frontend 'message' event: {data}")
+        socketio.emit("response", data, namespace="/frontend")
+
+    def on_drone_ai_abort(self, drone_id):
+        print(f"Unity /unity 'drone_ai_abort' event: {drone_id}")
+        socketio.emit("drone_ai_abort_command", drone_id, namespace="/unity")
+
+
+    def on_drone_feed(self, data):
+        print(data)
+
+
 socketio.on_namespace(UnityNamespace("/unity"))
 socketio.on_namespace(FrontendNamespace("/frontend"))
+socketio.on_namespace(FrontendNamespace("/ai"))
 
 
 if __name__ == "__main__":

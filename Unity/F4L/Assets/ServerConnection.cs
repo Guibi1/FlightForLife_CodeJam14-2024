@@ -56,7 +56,7 @@ public class ServerConnection : MonoBehaviour
             drone.GetComponent<MoveDrone>().MoveDroneTo(clickedPos, json.id);
         });
 
-        socket.OnUnityThread("abort_move_command", response =>
+        socket.OnUnityThread("drone_ai_abort", response =>
         {
             AbortMovementRequest json = response.GetValue<AbortMovementRequest>();
             Debug.Log("Abort_Move_Command from server: " + json);
@@ -65,6 +65,30 @@ public class ServerConnection : MonoBehaviour
             if (drone != null)
             {
                 drone.GetComponent<MoveDrone>().ResumeScanMovements();
+            }
+        });
+
+        socket.OnUnityThread("drone_pause", response =>
+        {
+            PauseGoRequest json = response.GetValue<PauseGoRequest>();
+            Debug.Log("Pause_Command from server: " + json);
+
+            
+            if (drones[json.id] != null)
+            {
+                drones[json.id].GetComponent<MoveDrone>().PauseScanMovements();
+            }
+        });
+
+        socket.OnUnityThread("drone_go", response =>
+        {
+            PauseGoRequest json = response.GetValue<PauseGoRequest>();
+            Debug.Log("Go_Command from server: " + json);
+
+
+            if (drones[json.id] != null)
+            {
+                drones[json.id].GetComponent<MoveDrone>().ResumeScanMovements();
             }
         });
 
@@ -199,5 +223,13 @@ public class ServerConnection : MonoBehaviour
         public int id;
         public float rotation;
     }
+
+    [System.Serializable]
+    public class PauseGoRequest
+    {
+        public int id;
+    }
+
+    
 }
 
