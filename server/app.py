@@ -1,5 +1,5 @@
 from flask import Flask, jsonify
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, Namespace
 import torch
 from ultralytics import YOLO
 
@@ -55,20 +55,19 @@ def handle_drone_feed(data):
     update_drones(drone_id, human_count)
 
 # WebSocket event handler for client connections
-@socketio.on("connect")
-def handle_connect():
-    print("Client connected.")
-    socketio.emit("welcome", {"message": "Connected to the server!"})
 
-# WebSocket event handler for client disconnections
-@socketio.on("disconnect")
-def handle_disconnect():
-    print("Client disconnected.")
+class FrontendNamespace(Namespace):
+    def on_connect(self):
+        print("Frontend client connected to /frontend")
 
-@socketio.on('message')
-def handle_message(message):
-    print(f"Received message from client: {message}")
-    socketio.emit('response', {'data': f"Server received: {message['data']}"})  # Echo message
+    def on_disconnect(self):
+        print("Frontend client disconnected from /frontend")
+
+    def on_message(self, data):
+        print(f"Frontend /frontend 'message' event: {data}")
+        socketio.emit('response', data, namespace='/frontend')
+
+socketio.on_namespace(FrontendNamespace('/frontend'))
 
 if __name__ == "__main__":
     # Run the Flask app with SocketIO

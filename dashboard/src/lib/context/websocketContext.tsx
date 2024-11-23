@@ -36,6 +36,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
 
 		// Listen for "response" events from the server
 		socketInstance.on("response", (data: { data: string }) => {
+			console.log(data)
 			console.log("Message from server:", data.data);
 			setMessages((prevMessages) => [...prevMessages, data.data]);
 		});
