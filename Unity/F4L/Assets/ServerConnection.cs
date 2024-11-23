@@ -12,11 +12,12 @@ public class ServerConnection : MonoBehaviour
     private SocketIOUnity socket;
 
     [SerializeField]
-    private List<GameObject> drones;
+    public List<GameObject> drones;
 
-    private const double originLatitude = 37.926337; 
-    private const double originLongitude = -122.612707;
-    private const double scaleFactor = 0.0001;
+    [Header("Map")]
+    public static float originLatitude = -0.375984f;
+    public static float originLongitude = 39.47132f;
+    public const float scaleFactor = 0.0001f;
 
 
     void Start()
@@ -73,7 +74,7 @@ public class ServerConnection : MonoBehaviour
             PauseGoRequest json = response.GetValue<PauseGoRequest>();
             Debug.Log("Pause_Command from server: " + json);
 
-            
+
             if (drones[json.drone] != null)
             {
                 drones[json.drone].GetComponent<MoveDrone>().PauseScanMovements();
@@ -179,7 +180,7 @@ public class ServerConnection : MonoBehaviour
 
         // Return a new DroneData object with converted values
         return new Vector2((float)x, (float)y);
-        
+
     }
 
 
@@ -232,6 +233,5 @@ public class ServerConnection : MonoBehaviour
         public int drone;
     }
 
-    
-}
 
+}
