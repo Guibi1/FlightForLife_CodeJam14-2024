@@ -35,7 +35,7 @@ class UnityNamespace(Namespace):
         print("Unity client disconnected from /unity")
 
     def on_message(self,data):
-        print(f"Frontend /frontend 'message' event: {data}")
+        print(f"Unity /unity 'message' event: {data}")
         socketio.emit('message', data, namespace='/unity')
 
     def on_drone_feed(self, data):

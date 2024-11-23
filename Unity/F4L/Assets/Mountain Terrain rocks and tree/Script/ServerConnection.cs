@@ -7,49 +7,43 @@ public class ServerConnection : MonoBehaviour
 
     void Start()
     {
-        // Set up the Socket.IO client options
-        var uri = new System.Uri("http://localhost:3000"); // Replace with your server URL
-        socket = new SocketIOUnity(uri, new SocketIOOptions
-        {
-            Query = new System.Collections.Generic.Dictionary<string, string>
-            {
-                { "token", "UNITY" }
-            },
-            Transport = SocketIOClient.Transport.TransportProtocol.WebSocket
-        });
+        Debug.Log("Initializing Socket.IO client...");
+        var uri = new System.Uri("http://localhost:5000/unity");
+        socket = new SocketIOUnity(uri);
 
-        // Register event handlers
-        socket.OnConnected += Socket_OnConnected;
-        socket.OnDisconnected += Socket_OnDisconnected;
+        socket.OnConnected += (sender, e) =>
+        {
+            Debug.Log("Connected to Socket.IO server!");
+
+            SendMessageToServer("Hello from Unity!");
+        };
+
+        socket.OnDisconnected += (sender, e) =>
+        {
+            Debug.Log("Disconnected from server: " + e);
+        };
+
         socket.On("message", response =>
         {
-            Debug.Log("Received message: " + response.GetValue<string>());
+            Debug.Log("Message from server: " + response.GetValue<string>());
         });
 
-        // Connect to the server
+        Debug.Log("Attempting to connect...");
         socket.Connect();
     }
 
-    private void Socket_OnConnected(object sender, System.EventArgs e)
+    // Function to emit a message to the server
+    public void SendMessageToServer(string message)
     {
-        Debug.Log("Socket.IO connected!");
-
-        // Send a message to the server
-        socket.Emit("message", "Hello from Unity!");
-    }
-
-    private void Socket_OnDisconnected(object sender, string e)
-    {
-        Debug.Log("Socket.IO disconnected: " + e);
-    }
-
-    void OnDestroy()
-    {
-        if (socket != null)
+        if (socket.Connected)
         {
-            // Disconnect and dispose of the socket
-            socket.Disconnect();
-            socket.Dispose();
+            Debug.Log($"Sending message to server: {message}");
+            socket.Emit("message", message);
+        }
+        else
+        {
+            Debug.LogWarning("Cannot send message. Not connected to server.");
         }
     }
+
 }
