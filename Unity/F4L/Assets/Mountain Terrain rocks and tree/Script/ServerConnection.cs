@@ -32,6 +32,14 @@ public class ServerConnection : MonoBehaviour
         socket.Connect();
     }
 
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            SendMessageToServer("Space key pressed in Unity!");
+        }
+    }
+
     // Function to emit a message to the server
     public void SendMessageToServer(string message)
     {
