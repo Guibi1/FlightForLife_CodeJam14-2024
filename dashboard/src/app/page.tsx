@@ -136,7 +136,7 @@ export default function HomePage() {
                                                         <Button
                                                             onClick={() =>
                                                                 send({
-                                                                    type: "dismiss-alert",
+                                                                    type: "dismiss_alert",
                                                                     drone: drone.id,
                                                                     confirmed: true,
                                                                 })
@@ -152,7 +152,7 @@ export default function HomePage() {
                                                             variant="destructive"
                                                             onClick={() =>
                                                                 send({
-                                                                    type: "dismiss-alert",
+                                                                    type: "dismiss_alert",
                                                                     drone: drone.id,
                                                                     confirmed: false,
                                                                 })

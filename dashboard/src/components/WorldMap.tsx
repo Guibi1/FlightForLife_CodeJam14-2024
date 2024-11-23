@@ -114,11 +114,11 @@ export default function WorldMap({ onDroneSelect }: { onDroneSelect: (drone: Dro
                         onClick={(e) => {
                             e.stopPropagation();
                             const id = nanoid();
-                            send({ type: "request-movement", ...pointClicked, id });
+                            send({ type: "request_movement", ...pointClicked, id });
                             toast.success("A drone is being sent to this location", {
                                 cancel: {
                                     label: "Abort",
-                                    onClick: () => send({ type: "abort-movement", id }),
+                                    onClick: () => send({ type: "abort_movement", id }),
                                 },
                             });
                             setPointClicked(null);
