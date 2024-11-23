@@ -6,61 +6,44 @@ import { type Socket, io } from "socket.io-client";
 import type { Drone } from "./types";
 
 type Message =
-	| { type: "dismiss_alert"; drone: number; confirmed: boolean }
-	| { type: "request_movement"; lng: number; lat: number; id: string }
+    | { type: "dismiss_alert"; drone: number; confirmed: boolean }
+    | { type: "stop_override"; drone: number }
+    | { type: "request_movement"; lng: number; lat: number; id: string }
     | { type: "abort_movement"; id: string };
 type WebSocketContextType = {
-	send: (message: Message) => void;
-	drones: Drone[];
+    send: (message: Message) => void;
+    drones: Drone[];
 };
 
 const context = createContext<WebSocketContextType | null>(null);
 
 export function WebSocketProvider({ children }: { children: ReactNode }) {
-	const [socket, setSocket] = useState<Socket | null>(null);
-	const [drones, setDrones] = useState<Drone[]>([
-		{
-			id: 1,
-			lng: -122.612707,
-			lat: 37.926337,
-			alert: false,
-		},
-		{
-			id: 2,
-			lng: -122.611007,
-			lat: 37.926937,
-			alert: true,
-		},
-	]);
+    const [socket, setSocket] = useState<Socket | null>(null);
+    const [drones, setDrones] = useState<Drone[]>([]);
 
-	useEffect(() => {
-		const socketInstance = io(`${env.NEXT_PUBLIC_SERVER_URL}/frontend`);
-		setSocket(socketInstance);
+    useEffect(() => {
+        const socketInstance = io(`${env.NEXT_PUBLIC_SERVER_URL}/frontend`);
+        setSocket(socketInstance);
 
-		socketInstance.on("drones", (drones: string) => {
-			console.log("Message from server:", drones);
-			setDrones(JSON.parse(drones));
-		});
+        socketInstance.on("drones", (drones: string) => {
+            console.log("Message from server:", drones);
+            setDrones(JSON.parse(drones));
+        });
 
-		return () => {
-			socketInstance.disconnect();
-			setSocket(null);
-		};
-	}, []);
+        return () => {
+            socketInstance.disconnect();
+            setSocket(null);
+        };
+    }, []);
 
-	const send = useMemo(
-		() => (message: Message) => socket?.emit(message.type, message),
-		[socket],
-	);
-	return (
-		<context.Provider value={{ drones, send }}>{children}</context.Provider>
-	);
+    const send = useMemo(() => (message: Message) => socket?.emit(message.type, message), [socket]);
+    return <context.Provider value={{ drones, send }}>{children}</context.Provider>;
 }
 
 export function useWebSocket(): WebSocketContextType {
-	const c = useContext(context);
-	if (!c) {
-		throw new Error("useWebSocket must be used within a WebSocketProvider");
-	}
-	return c;
+    const c = useContext(context);
+    if (!c) {
+        throw new Error("useWebSocket must be used within a WebSocketProvider");
+    }
+    return c;
 }

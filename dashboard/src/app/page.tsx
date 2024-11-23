@@ -118,7 +118,6 @@ export default function HomePage() {
                                                 <div className="flex gap-2">
                                                     <Button
                                                         variant={drone.alert ? "outline" : "default"}
-                                                        className="mr-auto"
                                                         onClick={() => {
                                                             selectDrone(null);
                                                             if (map && map.getZoom() >= 18) map?.zoomTo(16.5);
@@ -126,6 +125,19 @@ export default function HomePage() {
                                                     >
                                                         Back
                                                     </Button>
+
+                                                    {drone.overriten && (
+                                                        <Button
+                                                            variant="destructive"
+                                                            onClick={() =>
+                                                                send({ type: "stop_override", drone: drone.id })
+                                                            }
+                                                        >
+                                                            Resume scan
+                                                        </Button>
+                                                    )}
+
+                                                    <div className="w-full" />
 
                                                     {drone.alert && (
                                                         <Button

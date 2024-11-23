@@ -3,4 +3,5 @@ export type Drone = {
     lng: number;
     lat: number;
     alert: boolean;
+    overriten: boolean;
 };
