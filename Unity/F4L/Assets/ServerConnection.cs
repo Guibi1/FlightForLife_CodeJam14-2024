@@ -48,17 +48,17 @@ public class ServerConnection : MonoBehaviour
         {
             Dictionary<string, DroneData> droneDataList = new Dictionary<string, DroneData>();
 
-            foreach (GameObject drone in drones)
+            for (int i=0;i<drones.Length;i++)
             {
                 // Extract data from each drone
-                string droneId = drone.name; // Use the name of the GameObject as the ID
-                Vector3 position = drone.transform.position;
-                float rotation = drone.transform.eulerAngles.y;
+                string droneId = i.ToString(); // Use the name of the GameObject as the ID
+                Vector3 position = drones[i].transform.position;
+                float rotation = drones[i].transform.eulerAngles.y;
 
                 // Populate the DroneData object
                 DroneData droneData = new DroneData
                 {
-                    Positions = new PositionData
+                    pos = new PositionData
                     {
                         x = position.x,
                         y = position.y,
@@ -109,7 +109,7 @@ public class ServerConnection : MonoBehaviour
     [System.Serializable]
     public class DroneData
     {
-        public PositionData Positions;
+        public PositionData pos;
     }
 
 }
