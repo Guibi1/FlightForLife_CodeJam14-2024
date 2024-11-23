@@ -1,6 +1,7 @@
 import json
 from flask import Flask, Response
 from flask_socketio import SocketIO, Namespace
+import requests
 
 # Create Flask app and SocketIO instance
 app = Flask(__name__)
@@ -26,23 +27,10 @@ def get_drone(drone_id):
     Fetch the state of a specific drone by its ID.
     """
 
-    # return get request from docker ai
+    url = "http://localhost:" + (drone_id + 8001) + "/drone"
 
-    drone_data = drones[drone_id]
-    if drone_data:
-        return Response("", mimetype="multipart/x-mixed-replace; boundary=frame")
-    else:
-        # Return an error message within the expected byte format
-        error_frame = (
-            b"--frame\r\n"
-            b"Content-Type: text/plain\r\n\r\n"
-            b"Error: Drone with ID '%s' not found\r\n" % drone_id.encode()
-        )
-        return Response(
-            error_frame,
-            mimetype="multipart/x-mixed-replace; boundary=frame",
-            status=404,
-        )
+    res = requests.get(url)
+    return Response(res, mimetype="multipart/x-mixed-replace; boundary=frame")
 
 
 # Namespace for Unity
