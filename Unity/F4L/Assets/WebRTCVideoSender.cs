@@ -13,6 +13,7 @@ public class CameraStreamServer : MonoBehaviour
     {
         [Tooltip("Assign your camera here.")]
         public Camera sourceCamera; // Assign your camera in the Inspector
+        
 
         [HideInInspector]
         public RenderTexture renderTexture;
@@ -34,6 +35,8 @@ public class CameraStreamServer : MonoBehaviour
     [Header("Server Settings")]
     [Tooltip("Port number for the HTTP server.")]
     public int serverPort = 8080; // Port number for the HTTP server
+    public int resolutionX = 1280;
+    public int resolutionY = 720;
 
     private HttpListener httpListener;
     private Thread listenerThread;
@@ -82,7 +85,7 @@ public class CameraStreamServer : MonoBehaviour
             if (camStream.sourceCamera.targetTexture == null)
             {
                 // Create a new RenderTexture
-                RenderTexture rt = new RenderTexture(1280, 720, 24);
+                RenderTexture rt = new RenderTexture(resolutionX, resolutionY, 0);
                 rt.Create();
                 camStream.sourceCamera.targetTexture = rt;
                 camStream.renderTexture = rt;
@@ -127,7 +130,7 @@ public class CameraStreamServer : MonoBehaviour
             RenderTexture.active = currentRT;
 
             // Encode the texture to JPG
-            byte[] frameBytes = camStream.texture.EncodeToJPG();
+            byte[] frameBytes = camStream.texture.EncodeToJPG(75);
 
             // Enqueue the frame for streaming
             camStream.frameQueue.Enqueue(frameBytes);
@@ -238,7 +241,7 @@ public class CameraStreamServer : MonoBehaviour
                                     outputStream.Flush();
 
                                     // Sleep to control frame rate (approximately 30 FPS)
-                                    Thread.Sleep(3);
+                                    Thread.Sleep(67);
                                 }
                                 else
                                 {
