@@ -2,3 +2,5 @@ Flask
 flask-socketio
 eventlet
 flask_cors
+ultralytics
+torch

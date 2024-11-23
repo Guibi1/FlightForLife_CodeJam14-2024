@@ -6,6 +6,8 @@ from ultralytics import YOLO
 # Create Flask app and SocketIO instance
 app = Flask(__name__)
 socketio = SocketIO(app)
+socketio = SocketIO(app, cors_allowed_origins="*")
+
 
 # Dictionary to store drone states and their respective models
 drones = {}
@@ -62,6 +64,11 @@ def handle_connect():
 @socketio.on("disconnect")
 def handle_disconnect():
     print("Client disconnected.")
+
+@socketio.on('message')
+def handle_message(message):
+    print(f"Received message from client: {message}")
+    socketio.emit('response', {'data': f"Server received: {message['data']}"})  # Echo message
 
 if __name__ == "__main__":
     # Run the Flask app with SocketIO
