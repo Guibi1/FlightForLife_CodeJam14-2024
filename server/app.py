@@ -1,8 +1,6 @@
-from flask import Flask, Response, jsonify
+import json
+from flask import Flask, Response
 from flask_socketio import SocketIO, Namespace
-import torch
-import cv2
-from ultralytics import YOLO
 
 # Create Flask app and SocketIO instance
 app = Flask(__name__)
@@ -22,23 +20,6 @@ def update_drones(drone_id, human_count):
     socketio.emit("drone_update", {"drone_id": drone_id, "human_count": human_count})
 
 
-def generate_frames():
-    # Capture video from the default camera (0). Replace with a video file path if needed.
-    camera = cv2.VideoCapture(0)
-
-    while True:
-        success, frame = camera.read()
-        if not success:
-            break
-        else:
-            # Encode the frame as JPEG
-            ret, buffer = cv2.imencode(".jpg", frame)
-            frame = buffer.tobytes()
-
-            # Yield the frame in the HTTP response
-            yield (b"--frame\r\n" b"Content-Type: image/jpeg\r\n\r\n" + frame + b"\r\n")
-
-
 @app.route("/drone/<int:drone_id>", methods=["GET"])
 def get_drone(drone_id):
     """
@@ -49,9 +30,7 @@ def get_drone(drone_id):
 
     drone_data = drones[drone_id]
     if drone_data:
-        return Response(
-            generate_frames(), mimetype="multipart/x-mixed-replace; boundary=frame"
-        )
+        return Response("", mimetype="multipart/x-mixed-replace; boundary=frame")
     else:
         # Return an error message within the expected byte format
         error_frame = (
@@ -79,8 +58,14 @@ class UnityNamespace(Namespace):
         socketio.emit("message", data, namespace="/unity")
 
     def on_positions(self, data):
+        data = json.loads(data)
+        # print(data, type(data))
+
+        global drones
+
         for drone in data:
-            drone.alert = drone.id in alerts
+            drone["alert"] = drone["id"] in alerts
+            drones[drone["id"]] = drone
 
         socketio.emit("drones", data, namespace="/frontend")
 
@@ -100,12 +85,32 @@ class FrontendNamespace(Namespace):
         socketio.emit("response", data, namespace="/frontend")
 
     def on_request_movement(self, data):
-        print("Frontend: Requesting Movement", data, type(data))
+        print("Frontend: Requesting Movement", data)
         socketio.emit("move_command", data, namespace="/unity")
 
     def on_abort_movement(self, data):
-        print("Frontend: Requesting Movement", data, type(data))
+        print("Frontend: Abort Movement Request", data)
         socketio.emit("abort_move_command", data, namespace="/unity")
+
+    def on_stop_override(self, data):
+        print("Frontend: Stop Movement Override ", data)
+        socketio.emit("drone_go", data, namespace="/unity")
+
+    def on_dismiss_alert(self, data):
+        print("Frontend: Dismissing Alerts", data)
+        if data.confirmed:
+            socketio.emit(
+                "move_command",
+                {
+                    "lng": drones[data.drone].lng,
+                    "lat": drones[data.drone].lat,
+                    "id": "rescue" + data.drone,
+                },
+                namespace="/unity",
+            )
+        else:
+            alerts.remove(data.drone)
+            socketio.emit("drone_go", {"drone": data.drone}, namespace="/unity")
 
 
 class AiNamespace(Namespace):
@@ -119,10 +124,9 @@ class AiNamespace(Namespace):
         print(f"Frontend /frontend 'message' event: {data}")
         socketio.emit("response", data, namespace="/frontend")
 
-    def on_drone_ai_abort(self, drone_id):
+    def on_drone_ai_alert(self, drone_id):
         print(f"Unity /unity 'drone_ai_abort' event: {drone_id}")
-        socketio.emit("drone_ai_abort_command", drone_id, namespace="/unity")
-
+        socketio.emit("drone_pause", {"drone": drone_id}, namespace="/unity")
 
     def on_drone_feed(self, data):
         print(data)

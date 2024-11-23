@@ -42,10 +42,11 @@ public class MoveDrone : MonoBehaviour
         if (overrideDescr != null)
         {
             overrideId = null;
+            overrideDescr.setOnComplete(() => { });
             LeanTween.cancel(overrideDescr.id);
-            overrideDescr = LeanTween.move(gameObject, pausedPosition, 2f)
+            overrideDescr = LeanTween.move(gameObject, pausedPosition, 20f)
                 .setEase(LeanTweenType.easeInOutSine)
-                .setSpeed(2f).setOnComplete(() => pathDescr.resume());
+                .setSpeed(2f).setOnComplete(() => { pathDescr.resume(); overrideDescr = null; });
         }
         else
         {

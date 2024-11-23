@@ -73,7 +73,7 @@ export default function HomePage() {
                                                 drone.id === selectedDrone?.id && "font-bold",
                                             )}
                                         >
-                                            Drone #{drone.id}
+                                            Drone #{drone.id + 1}
                                         </p>
 
                                         {drone.alert && (

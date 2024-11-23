@@ -56,12 +56,12 @@ public class ServerConnection : MonoBehaviour
             drone.GetComponent<MoveDrone>().MoveDroneTo(clickedPos, json.id);
         });
 
-        socket.OnUnityThread("drone_ai_abort", response =>
+        socket.OnUnityThread("abort_move_command", response =>
         {
             AbortMovementRequest json = response.GetValue<AbortMovementRequest>();
             Debug.Log("Abort_Move_Command from server: " + json);
 
-            var drone = drones.Where(drone => drone.GetComponent<MoveDrone>().GetOverrideId().Equals(json.id)).First();
+            var drone = drones.Where(drone => drone.GetComponent<MoveDrone>().GetOverrideId() == json.id).First();
             if (drone != null)
             {
                 drone.GetComponent<MoveDrone>().ResumeScanMovements();
@@ -74,9 +74,9 @@ public class ServerConnection : MonoBehaviour
             Debug.Log("Pause_Command from server: " + json);
 
             
-            if (drones[json.id] != null)
+            if (drones[json.drone] != null)
             {
-                drones[json.id].GetComponent<MoveDrone>().PauseScanMovements();
+                drones[json.drone].GetComponent<MoveDrone>().PauseScanMovements();
             }
         });
 
@@ -86,9 +86,9 @@ public class ServerConnection : MonoBehaviour
             Debug.Log("Go_Command from server: " + json);
 
 
-            if (drones[json.id] != null)
+            if (drones[json.drone] != null)
             {
-                drones[json.id].GetComponent<MoveDrone>().ResumeScanMovements();
+                drones[json.drone].GetComponent<MoveDrone>().ResumeScanMovements();
             }
         });
 
@@ -159,6 +159,7 @@ public class ServerConnection : MonoBehaviour
             lng = (float)longitude,
             lat = (float)latitude,
             rotation = drone.transform.eulerAngles.z,
+            overriten = drone.GetComponent<MoveDrone>().GetOverrideId() != null,
         };
     }
 
@@ -222,12 +223,13 @@ public class ServerConnection : MonoBehaviour
     {
         public int id;
         public float rotation;
+        public bool overriten;
     }
 
     [System.Serializable]
     public class PauseGoRequest
     {
-        public int id;
+        public int drone;
     }
 
     
