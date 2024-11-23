@@ -81,6 +81,10 @@ class UnityNamespace(Namespace):
     def on_message(self, data):
         print(f"Unity /unity 'message' event: {data}")
         socketio.emit("message", data, namespace="/unity")
+    
+    def on_positions(self,data):
+        print(f"Unity /unity 'positions' event: {data}")
+        socketio.emit("message", "Python Server received Drone Positions", namespace="/unity")
 
     def on_drone_feed(self, data):
         """

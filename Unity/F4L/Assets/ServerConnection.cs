@@ -1,9 +1,14 @@
 using UnityEngine;
-using SocketIOClient;
+using Newtonsoft.Json;
+using System.Collections.Generic;
 
 public class ServerConnection : MonoBehaviour
 {
     private SocketIOUnity socket;
+
+    [SerializeField]
+    private GameObject[] drones;
+
 
     void Start()
     {
@@ -34,9 +39,45 @@ public class ServerConnection : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        SendDronePositionsToServer();
+    }
+
+    public void SendDronePositionsToServer()
+    {
+        if (socket.Connected)
         {
-            SendMessageToServer("Space key pressed in Unity!");
+            Dictionary<string, DroneData> droneDataList = new Dictionary<string, DroneData>();
+
+            foreach (GameObject drone in drones)
+            {
+                // Extract data from each drone
+                string droneId = drone.name; // Use the name of the GameObject as the ID
+                Vector3 position = drone.transform.position;
+                float rotation = drone.transform.eulerAngles.y;
+
+                // Populate the DroneData object
+                DroneData droneData = new DroneData
+                {
+                    Positions = new PositionData
+                    {
+                        x = position.x,
+                        y = position.y,
+                        z = position.z,
+                        rotation = rotation
+                    }
+                };
+
+                // Add to the dictionary with the drone ID as the key
+                droneDataList[droneId] = droneData;
+            }
+
+            string json = JsonConvert.SerializeObject(droneDataList, Formatting.Indented);
+            socket.Emit("positions", json);
+
+        }
+        else
+        {
+            Debug.LogWarning("Cannot send positions. Not connected to server.");
         }
     }
 
@@ -45,6 +86,8 @@ public class ServerConnection : MonoBehaviour
     {
         if (socket.Connected)
         {
+
+
             Debug.Log($"Sending message to server: {message}");
             socket.Emit("message", message);
         }
@@ -54,4 +97,20 @@ public class ServerConnection : MonoBehaviour
         }
     }
 
+    [System.Serializable]
+    public class PositionData
+    {
+        public float x;
+        public float y;
+        public float z;
+        public float rotation;
+    }
+
+    [System.Serializable]
+    public class DroneData
+    {
+        public PositionData Positions;
+    }
+
 }
+
