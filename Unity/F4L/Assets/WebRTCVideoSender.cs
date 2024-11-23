@@ -238,7 +238,7 @@ public class CameraStreamServer : MonoBehaviour
                                     outputStream.Flush();
 
                                     // Sleep to control frame rate (approximately 30 FPS)
-                                    Thread.Sleep(33);
+                                    Thread.Sleep(3);
                                 }
                                 else
                                 {

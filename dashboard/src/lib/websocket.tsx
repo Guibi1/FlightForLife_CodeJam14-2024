@@ -1,55 +1,56 @@
 "use client";
 import { env } from "@/env";
-import type React from "react";
 import type { ReactNode } from "react";
-import { createContext, useContext, useEffect, useState } from "react";
-import type { Socket } from "socket.io-client";
-import { io } from "socket.io-client";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { type Socket, io } from "socket.io-client";
+import type { Drone } from "./types";
 
-// Define the shape of the WebSocket context
-interface WebSocketContextType {
-    socket: Socket | null; // Socket instance
-    messages: string[]; // List of messages from the server
-}
+type Message = { type: "" };
+type WebSocketContextType = {
+    send: (message: Message) => void;
+    drones: Drone[];
+};
 
-// Create the WebSocket context
-const WebSocketContext = createContext<WebSocketContextType | undefined>(undefined);
+const context = createContext<WebSocketContextType | null>(null);
 
-// Define the WebSocket provider props
-interface WebSocketProviderProps {
-    children: ReactNode;
-}
-
-// WebSocket Provider component
-export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }) => {
+export function WebSocketProvider({ children }: { children: ReactNode }) {
     const [socket, setSocket] = useState<Socket | null>(null);
-    const [messages, setMessages] = useState<string[]>([]);
+    const [drones, setDrones] = useState<Drone[]>([
+        {
+            id: 1,
+            lng: -122.612707,
+            lat: 37.926337,
+        },
+        {
+            id: 2,
+            lng: -122.611007,
+            lat: 37.926937,
+        },
+    ]);
 
     useEffect(() => {
-        // Initialize the Socket.IO connection
-        const socketInstance = io(env.NEXT_PUBLIC_SERVER_URL); // Flask server URL
+        const socketInstance = io(env.NEXT_PUBLIC_SERVER_URL);
         setSocket(socketInstance);
 
-        // Listen for "response" events from the server
-        socketInstance.on("response", (data: { data: string }) => {
-            console.log("Message from server:", data.data);
-            setMessages((prevMessages) => [...prevMessages, data.data]);
+        socketInstance.on("drones", (drones: Drone[]) => {
+            console.log("Message from server:", drones);
+            setDrones(drones);
         });
 
-        // Cleanup when component unmounts
         return () => {
             socketInstance.disconnect();
+            setSocket(null);
         };
     }, []);
 
-    return <WebSocketContext.Provider value={{ socket, messages }}>{children}</WebSocketContext.Provider>;
-};
+    const send = useMemo(() => (message: Message) => socket?.emit(message.type, message), [socket]);
+    return <context.Provider value={{ drones, send }}>{children}</context.Provider>;
+}
 
-// Custom hook for consuming the WebSocket context
-export const useWebSocket = (): WebSocketContextType => {
-    const context = useContext(WebSocketContext);
-    if (!context) {
+export function useWebSocket(): WebSocketContextType {
+    const c = useContext(context);
+    if (!c) {
         throw new Error("useWebSocket must be used within a WebSocketProvider");
     }
-    return context;
-};
+    return c;
+}
