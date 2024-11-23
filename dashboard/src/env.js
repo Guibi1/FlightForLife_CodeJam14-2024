@@ -17,6 +17,7 @@ export const env = createEnv({
      */
     client: {
         NEXT_PUBLIC_SERVER_URL: z.string(),
+        NEXT_PUBLIC_MAPBOX_API: z.string(),
     },
 
     /**
@@ -26,6 +27,7 @@ export const env = createEnv({
     runtimeEnv: {
         NODE_ENV: process.env.NODE_ENV,
         NEXT_PUBLIC_SERVER_URL: process.env.NEXT_PUBLIC_SERVER_URL,
+        NEXT_PUBLIC_MAPBOX_API: process.env.NEXT_PUBLIC_MAPBOX_API,
     },
     /**
      * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
