@@ -1,6 +1,7 @@
 using UnityEngine;
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using System;
 
 public class ServerConnection : MonoBehaviour
 {
@@ -8,6 +9,10 @@ public class ServerConnection : MonoBehaviour
 
     [SerializeField]
     private GameObject[] drones;
+
+    private const double originLatitude = 37.926337; 
+    private const double originLongitude = -122.612707;
+    private const double scaleFactor = 0.00001;
 
 
     void Start()
@@ -33,6 +38,14 @@ public class ServerConnection : MonoBehaviour
             Debug.Log("Message from server: " + response.GetValue<string>());
         });
 
+        socket.On("move_command", response =>
+        {
+            Debug.Log("Move_Command from server: " + response.GetValue<DroneWebPositionData>());
+
+            DroneData droneData = ConvertLatLonToCoordinates(response.GetValue<DroneWebPositionData>(), originLatitude, originLongitude, scaleFactor);
+            MoveDroneTo(droneData);
+        });
+
         Debug.Log("Attempting to connect...");
         socket.Connect();
     }
@@ -46,26 +59,17 @@ public class ServerConnection : MonoBehaviour
     {
         if (socket.Connected)
         {
-            Dictionary<string, DroneData> droneDataList = new Dictionary<string, DroneData>();
+            Dictionary<string, DroneWebPositionData> droneDataList = new Dictionary<string, DroneWebPositionData>();
 
-            for (int i=0;i<drones.Length;i++)
+            for (int i = 0; i < drones.Length; i++)
             {
                 // Extract data from each drone
                 string droneId = i.ToString(); // Use the name of the GameObject as the ID
                 Vector3 position = drones[i].transform.position;
                 float rotation = drones[i].transform.eulerAngles.y;
 
-                // Populate the DroneData object
-                DroneData droneData = new DroneData
-                {
-                    pos = new PositionData
-                    {
-                        x = position.x,
-                        y = position.y,
-                        z = position.z,
-                        rotation = rotation
-                    }
-                };
+            
+                DroneWebPositionData droneData = ConvertCoordinatesToLatLon(i, originLatitude,originLongitude,scaleFactor);
 
                 // Add to the dictionary with the drone ID as the key
                 droneDataList[droneId] = droneData;
@@ -79,6 +83,14 @@ public class ServerConnection : MonoBehaviour
         {
             Debug.LogWarning("Cannot send positions. Not connected to server.");
         }
+    }
+    public void MoveDroneTo(DroneData droneData){
+        Vector3 targetPosition = new Vector3(droneData.pos.x, droneData.pos.y, droneData.pos.z);
+        float moveSpeed = 2f;
+
+        LeanTween.move(gameObject, targetPosition,moveSpeed)
+            .setEase(LeanTweenType.easeInOutSine)
+            .setSpeed(moveSpeed);
     }
 
     // Function to emit a message to the server
@@ -97,6 +109,58 @@ public class ServerConnection : MonoBehaviour
         }
     }
 
+    public DroneData ConvertLatLonToCoordinates(DroneWebPositionData droneWebData, double originLatitude, double originLongitude, double scaleFactor)
+    {
+        if (droneWebData == null)
+        {
+            throw new ArgumentNullException("DroneWebPositionData cannot be null.");
+        }
+
+        // Extract latitude and longitude
+        double latitude = droneWebData.lat;
+        double longitude = droneWebData.lng;
+
+        // Convert latitude and longitude to local x, y coordinates
+        double y = (latitude - originLatitude) / scaleFactor;
+        double x = (longitude - originLongitude) * Math.Cos(originLatitude * Math.PI / 180) / scaleFactor;
+
+        // Return a new DroneData object with converted values
+        return new DroneData
+        {
+            pos = new PositionData
+            {
+                x = (float)x,
+                y = (float)y,
+                z = drones[droneWebData.id].transform.position.z, // Default Z value (can be updated if needed)
+                rotation = 0 // Default rotation (can be updated if needed)
+            }
+        };
+    }
+
+
+
+    public DroneWebPositionData ConvertCoordinatesToLatLon(int i, double originLatitude, double originLongitude, double scaleFactor)
+    {
+        GameObject drone = drones[i];
+
+        // Extract x and y from the DroneData object
+        double x = drone.transform.position.x;
+        double y = drone.transform.position.y;
+
+        // Convert x, y to latitude and longitude
+        double latitude = originLatitude + (y * scaleFactor);
+        double longitude = originLongitude + (x * scaleFactor / Math.Cos(originLatitude * Math.PI / 180));
+
+        // Return a new DroneWebPositionData object with converted values
+        return new DroneWebPositionData
+        {
+            id =  i, // Default ID or customize as needed
+            lng = (float)longitude,
+            lat = (float)latitude
+            
+        };
+    }
+
     [System.Serializable]
     public class PositionData
     {
@@ -110,6 +174,15 @@ public class ServerConnection : MonoBehaviour
     public class DroneData
     {
         public PositionData pos;
+    }
+
+    public class DroneWebPositionData
+    {
+        public int id;
+        public float lng;
+        public float lat;
+        public float rotation;
+        public float z;
     }
 
 }
