@@ -1,6 +1,7 @@
 import { env } from "@/env";
 import type { Drone } from "@/lib/types";
 import { useWebSocket } from "@/lib/websocket";
+import { motion } from "framer-motion";
 import { FlagIcon } from "lucide-react";
 import Mapbox, { type LngLat } from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -10,6 +11,9 @@ import MapGL, { Layer, Marker, Source, useMap } from "react-map-gl";
 import { toast } from "sonner";
 import DroneIcon from "./DroneIcon";
 import { Button } from "./ui/button";
+
+const MotionMarker = motion.create(Marker);
+const MotionSource = motion.create(Source);
 
 export default function WorldMap({ onDroneSelect }: { onDroneSelect: (drone: Drone) => void }) {
     const { drones, send } = useWebSocket();
@@ -43,7 +47,8 @@ export default function WorldMap({ onDroneSelect }: { onDroneSelect: (drone: Dro
             onClick={(e) => setPointClicked(e.lngLat)}
         >
             {drones.map((drone) => (
-                <Marker
+                <MotionMarker
+                    layout
                     longitude={drone.lng}
                     latitude={drone.lat}
                     anchor="center"
@@ -63,12 +68,13 @@ export default function WorldMap({ onDroneSelect }: { onDroneSelect: (drone: Dro
                     >
                         <DroneIcon primary="fill-primary" secondary="fill-foreground/40" />
                     </Button>
-                </Marker>
+                </MotionMarker>
             ))}
 
             {styleLoaded &&
                 drones.map((drone) => (
-                    <Source
+                    <MotionSource
+                        layout
                         type="geojson"
                         data={{
                             type: "FeatureCollection",
@@ -99,7 +105,7 @@ export default function WorldMap({ onDroneSelect }: { onDroneSelect: (drone: Dro
                                 "circle-stroke-width": 1,
                             }}
                         />
-                    </Source>
+                    </MotionSource>
                 ))}
 
             {pointClicked && (
