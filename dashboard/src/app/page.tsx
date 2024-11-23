@@ -8,7 +8,7 @@ import type { Drone } from "@/lib/types";
 import { useWebSocket } from "@/lib/websocket";
 import clsx from "clsx";
 import { AnimatePresence, motion } from "framer-motion";
-import { CrosshairIcon, Loader2Icon } from "lucide-react";
+import { CrosshairIcon, EyeClosedIcon, LifeBuoyIcon, Loader2Icon, TriangleAlertIcon } from "lucide-react";
 import { useState } from "react";
 import { useMap } from "react-map-gl";
 
@@ -18,7 +18,7 @@ const MotionCardContent = motion.create(CardContent);
 
 export default function HomePage() {
     const { map } = useMap();
-    const { drones } = useWebSocket();
+    const { drones, send } = useWebSocket();
     const [selectedDrone, selectDrone] = useState<Drone | null>(null);
 
     return (
@@ -27,13 +27,15 @@ export default function HomePage() {
                 <WorldMap drones={drones} onDroneSelect={selectDrone} />
             </div>
 
-            <Card className="absolute inset-y-8 right-8 w-[30rem] h-fit border border-primary bg-background shadow-2xl">
+            <Card className="absolute inset-y-8 right-8 w-[40rem] h-fit border border-primary bg-background shadow-2xl">
                 <CardHeader>
-                    <CardTitle>Flight for life</CardTitle>
+                    <CardTitle className={clsx("transition-opacity", selectedDrone && "opacity-55")}>
+                        Flight for life
+                    </CardTitle>
                 </CardHeader>
 
                 <CardContent>
-                    <div className="flex flex-col">
+                    <div className="divide-y flex flex-col">
                         {drones.map((drone) => (
                             <div key={drone.id}>
                                 <MotionCard
@@ -42,18 +44,21 @@ export default function HomePage() {
                                         drone.id === selectedDrone?.id
                                             ? {
                                                   borderWidth: "1px",
-                                                  left: "-2rem",
-                                                  width: "calc(100% + 4rem)",
+                                                  left: "-1rem",
+                                                  width: "calc(100% + 2rem)",
                                               }
                                             : { borderWidth: "0px", left: "0rem", width: "100%" }
                                     }
                                     className={clsx(
-                                        "relative transition-[background]",
-                                        drone.id !== selectedDrone?.id && "hover:bg-muted",
+                                        "relative transition-opacity rounded my-1",
+                                        selectedDrone && drone.id !== selectedDrone.id && "opacity-55",
                                     )}
                                 >
                                     <MotionCardHeader
-                                        className="flex-row items-center justify-between gap-2"
+                                        className={clsx(
+                                            "flex-row items-center gap-2 transition-[background]",
+                                            drone.id !== selectedDrone?.id && "hover:bg-muted",
+                                        )}
                                         onClick={() => selectDrone(drone)}
                                         onKeyDown={(e: KeyboardEvent) => {
                                             if (e.key === "Enter") selectDrone(drone);
@@ -68,20 +73,30 @@ export default function HomePage() {
                                     >
                                         <p
                                             className={clsx(
-                                                "transition-all",
+                                                "transition-all mr-auto",
                                                 drone.id === selectedDrone?.id && "font-bold",
                                             )}
                                         >
                                             Drone #{drone.id}
                                         </p>
 
+                                        {drone.alert && (
+                                            <Button variant="destructive" size="icon" className="relative">
+                                                <div className="absolute inset-0 bg-destructive animate-ping duration-1000" />
+                                                <TriangleAlertIcon />
+                                            </Button>
+                                        )}
+
                                         <Button
                                             variant="outline"
                                             size="icon"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                map?.flyTo({ center: [drone.lng, drone.lat], zoom: 18 });
-                                            }}
+                                            onClick={() =>
+                                                map?.flyTo({
+                                                    center: [drone.lng, drone.lat],
+                                                    padding: { right: 350 },
+                                                    zoom: 18,
+                                                })
+                                            }
                                         >
                                             <CrosshairIcon />
                                         </Button>
@@ -99,15 +114,55 @@ export default function HomePage() {
                                                     <Loader2Icon className="animate-spin" />
 
                                                     <img
-                                                        className="absolute inset-0 text-background"
+                                                        className="absolute inset-0"
                                                         src={`${env.NEXT_PUBLIC_SERVER_URL}/drone/${drone.id}`}
                                                         alt="drone video stream"
                                                     />
                                                 </div>
 
-                                                <Button size="sm" onClick={() => selectDrone(null)}>
-                                                    Back
-                                                </Button>
+                                                <div className="flex gap-2">
+                                                    <Button
+                                                        variant={drone.alert ? "outline" : "default"}
+                                                        className="mr-auto"
+                                                        onClick={() => {
+                                                            selectDrone(null);
+                                                            if (map && map.getZoom() >= 18) map?.zoomTo(16.5);
+                                                        }}
+                                                    >
+                                                        Back
+                                                    </Button>
+
+                                                    {drone.alert && (
+                                                        <Button
+                                                            onClick={() =>
+                                                                send({
+                                                                    type: "dismiss-alert",
+                                                                    drone: drone.id,
+                                                                    confirmed: true,
+                                                                })
+                                                            }
+                                                        >
+                                                            <LifeBuoyIcon />
+                                                            Send help
+                                                        </Button>
+                                                    )}
+
+                                                    {drone.alert && (
+                                                        <Button
+                                                            variant="destructive"
+                                                            onClick={() =>
+                                                                send({
+                                                                    type: "dismiss-alert",
+                                                                    drone: drone.id,
+                                                                    confirmed: false,
+                                                                })
+                                                            }
+                                                        >
+                                                            <EyeClosedIcon />
+                                                            Ignore
+                                                        </Button>
+                                                    )}
+                                                </div>
                                             </MotionCardContent>
                                         )}
                                     </AnimatePresence>
