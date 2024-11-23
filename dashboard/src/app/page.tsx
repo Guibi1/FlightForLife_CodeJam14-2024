@@ -39,10 +39,14 @@ export default function HomePage() {
                 <CardContent>
                     <div className="divide-y flex flex-col">
                         {drones.map((drone) => (
-                            <button
-                                type="button"
+                            <div
                                 className="py-2 px-4 flex items-center justify-between rounded hover:bg-muted transition-[background]"
                                 onClick={() => selectDrone(drone)}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter") selectDrone(drone);
+                                }}
+                                // biome-ignore lint/a11y/noNoninteractiveTabindex: I have a on keydown
+                                tabIndex={0}
                                 key={drone.id}
                             >
                                 <p>Drone #{drone.id}</p>
@@ -56,7 +60,7 @@ export default function HomePage() {
                                 >
                                     <CrosshairIcon />
                                 </Button>
-                            </button>
+                            </div>
                         ))}
                     </div>
                 </CardContent>
