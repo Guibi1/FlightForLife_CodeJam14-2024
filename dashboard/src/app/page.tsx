@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { env } from "@/env";
 import type { Drone } from "@/lib/types";
+import { useWebSocket } from "@/lib/websocket";
 import clsx from "clsx";
 import { AnimatePresence, motion } from "framer-motion";
 import { CrosshairIcon, Loader2Icon } from "lucide-react";
@@ -17,20 +18,8 @@ const MotionCardContent = motion.create(CardContent);
 
 export default function HomePage() {
     const { map } = useMap();
+    const { drones } = useWebSocket();
     const [selectedDrone, selectDrone] = useState<Drone | null>(null);
-
-    const drones: Drone[] = [
-        {
-            id: 1,
-            lng: -122.612707,
-            lat: 37.926337,
-        },
-        {
-            id: 2,
-            lng: -122.611007,
-            lat: 37.926937,
-        },
-    ];
 
     return (
         <main className="relative flex-1">
@@ -53,10 +42,10 @@ export default function HomePage() {
                                         drone.id === selectedDrone?.id
                                             ? {
                                                   borderWidth: "1px",
-                                                  insetInline: "-2rem",
+                                                  left: "-2rem",
                                                   width: "calc(100% + 4rem)",
                                               }
-                                            : { borderWidth: "0px", insetInline: "0rem", width: "100%" }
+                                            : { borderWidth: "0px", left: "0rem", width: "100%" }
                                     }
                                     className={clsx(
                                         "relative transition-[background]",
