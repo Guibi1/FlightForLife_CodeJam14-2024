@@ -34,10 +34,10 @@ export default function WorldMap({ onDroneSelect }: { onDroneSelect: (drone: Dro
             mapboxAccessToken={env.NEXT_PUBLIC_MAPBOX_API}
             id="map"
             initialViewState={{
-                longitude: -122.612707,
-                latitude: 37.926337,
+                longitude: -0.375984,
+                latitude: 39.47132,
                 zoom: 16,
-                pitch: 20,
+                pitch: 60,
             }}
             mapStyle="mapbox://styles/guibi/cm3tlr9vo00hc01rwbr7ga0us"
             onClick={(e) => setPointClicked(e.lngLat)}
@@ -53,10 +53,11 @@ export default function WorldMap({ onDroneSelect }: { onDroneSelect: (drone: Dro
                     <Button
                         size="icon"
                         variant="secondary"
-                        onClick={() => {
+                        onClick={(e) => {
+                            e.stopPropagation();
                             setPointClicked(null);
                             onDroneSelect(drone);
-                            map?.flyTo({ center: [drone.lng, drone.lat], padding: { right: 350 } });
+                            map?.flyTo({ center: [drone.lng, drone.lat] });
                         }}
                         className="z-10"
                     >

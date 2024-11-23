@@ -2,7 +2,7 @@
 
 import WorldMap from "@/components/WorldMap";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { env } from "@/env";
 import type { Drone } from "@/lib/types";
 import { useWebSocket } from "@/lib/websocket";
@@ -22,17 +22,13 @@ export default function HomePage() {
     const [selectedDrone, selectDrone] = useState<Drone | null>(null);
 
     return (
-        <main className="relative flex-1">
-            <div className="absolute inset-0">
+        <main className="flex-1 flex">
+            <div className="flex-1">
                 <WorldMap onDroneSelect={selectDrone} />
             </div>
 
-            <Card className="absolute inset-y-8 right-8 w-[40rem] h-fit border border-primary bg-background shadow-2xl">
-                <CardHeader>
-                    <CardTitle className={clsx("transition-opacity", selectedDrone && "opacity-55")}>
-                        Flight for life
-                    </CardTitle>
-                </CardHeader>
+            <div className="flex flex-col gap-4 px-8 py-4 w-[40rem]">
+                <h1 className="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight">Flight for life</h1>
 
                 <CardContent>
                     <div className="divide-y flex flex-col">
@@ -44,8 +40,8 @@ export default function HomePage() {
                                         drone.id === selectedDrone?.id
                                             ? {
                                                   borderWidth: "1px",
-                                                  left: "-1rem",
-                                                  width: "calc(100% + 2rem)",
+                                                  left: "-2rem",
+                                                  width: "calc(100% + 4rem)",
                                               }
                                             : { borderWidth: "0px", left: "0rem", width: "100%" }
                                     }
@@ -93,7 +89,6 @@ export default function HomePage() {
                                             onClick={() =>
                                                 map?.flyTo({
                                                     center: [drone.lng, drone.lat],
-                                                    padding: { right: 350 },
                                                     zoom: 18,
                                                 })
                                             }
@@ -171,7 +166,7 @@ export default function HomePage() {
                         ))}
                     </div>
                 </CardContent>
-            </Card>
+            </div>
         </main>
     );
 }
