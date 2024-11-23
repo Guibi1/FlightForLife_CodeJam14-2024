@@ -24,7 +24,7 @@ export default function HomePage() {
     return (
         <main className="relative flex-1">
             <div className="absolute inset-0">
-                <WorldMap drones={drones} onDroneSelect={selectDrone} />
+                <WorldMap onDroneSelect={selectDrone} />
             </div>
 
             <Card className="absolute inset-y-8 right-8 w-[40rem] h-fit border border-primary bg-background shadow-2xl">

@@ -1,19 +1,21 @@
 import { env } from "@/env";
 import type { Drone } from "@/lib/types";
-import Mapbox from "mapbox-gl";
-import MapGL, { Layer, Marker, Source, useMap } from "react-map-gl";
-
+import { useWebSocket } from "@/lib/websocket";
+import { FlagIcon } from "lucide-react";
+import Mapbox, { type LngLat } from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
+import { nanoid } from "nanoid";
 import { useEffect, useState } from "react";
+import MapGL, { Layer, Marker, Source, useMap } from "react-map-gl";
+import { toast } from "sonner";
 import DroneIcon from "./DroneIcon";
 import { Button } from "./ui/button";
 
-export default function WorldMap({
-    drones,
-    onDroneSelect,
-}: { drones: Drone[]; onDroneSelect: (drone: Drone) => void }) {
-    const [styleLoaded, setStyleLoaded] = useState(false);
+export default function WorldMap({ onDroneSelect }: { onDroneSelect: (drone: Drone) => void }) {
+    const { drones, send } = useWebSocket();
     const { map } = useMap();
+    const [styleLoaded, setStyleLoaded] = useState(false);
+    const [pointClicked, setPointClicked] = useState<LngLat | null>(null);
 
     useEffect(() => {
         setStyleLoaded(map?.isStyleLoaded() ?? false);
@@ -38,6 +40,7 @@ export default function WorldMap({
                 pitch: 20,
             }}
             mapStyle="mapbox://styles/guibi/cm3tlr9vo00hc01rwbr7ga0us"
+            onClick={(e) => setPointClicked(e.lngLat)}
         >
             {drones.map((drone) => (
                 <Marker
@@ -51,6 +54,7 @@ export default function WorldMap({
                         size="icon"
                         variant="secondary"
                         onClick={() => {
+                            setPointClicked(null);
                             onDroneSelect(drone);
                             map?.flyTo({ center: [drone.lng, drone.lat], padding: { right: 350 } });
                         }}
@@ -96,6 +100,34 @@ export default function WorldMap({
                         />
                     </Source>
                 ))}
+
+            {pointClicked && (
+                <Marker
+                    longitude={pointClicked.lng}
+                    latitude={pointClicked.lat}
+                    anchor="center"
+                    rotationAlignment="viewport"
+                >
+                    <Button
+                        size="icon"
+                        className="z-10 rounded-full"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            const id = nanoid();
+                            send({ type: "request-movement", ...pointClicked, id });
+                            toast.success("A drone is being sent to this location", {
+                                cancel: {
+                                    label: "Abort",
+                                    onClick: () => send({ type: "abort-movement", id }),
+                                },
+                            });
+                            setPointClicked(null);
+                        }}
+                    >
+                        <FlagIcon />
+                    </Button>
+                </Marker>
+            )}
         </MapGL>
     );
 }

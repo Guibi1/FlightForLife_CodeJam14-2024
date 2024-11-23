@@ -7,7 +7,8 @@ import type { Drone } from "./types";
 
 type Message =
 	| { type: "dismiss-alert"; drone: number; confirmed: boolean }
-	| { type: "request-movement"; lng: number; lat: number };
+	| { type: "request-movement"; lng: number; lat: number; id: string }
+    | { type: "abort-movement"; id: string };
 type WebSocketContextType = {
 	send: (message: Message) => void;
 	drones: Drone[];

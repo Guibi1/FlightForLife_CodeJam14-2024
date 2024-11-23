@@ -1,6 +1,7 @@
 import "@/styles/globals.css";
 
 import MapProvider from "@/components/MapProvider";
+import { Toaster } from "@/components/ui/sonner";
 import { WebSocketProvider } from "@/lib/websocket";
 import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
@@ -15,7 +16,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <MapProvider>
             <WebSocketProvider>
                 <html lang="en" className={`${GeistSans.variable} dark`}>
-                    <body className="h-screen flex flex-row">{children}</body>
+                    <body className="h-screen flex flex-row">
+                        {children}
+
+                        <Toaster position="bottom-left" />
+                    </body>
                 </html>
             </WebSocketProvider>
         </MapProvider>
