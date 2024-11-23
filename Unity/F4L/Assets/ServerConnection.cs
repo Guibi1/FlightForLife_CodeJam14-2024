@@ -2,6 +2,7 @@ using UnityEngine;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System;
+using System.Collections;
 
 public class ServerConnection : MonoBehaviour
 {
@@ -42,7 +43,7 @@ public class ServerConnection : MonoBehaviour
         {
             Debug.Log("Move_Command from server: " + response.GetValue<DroneWebPositionData>());
 
-            DroneData droneData = ConvertLatLonToCoordinates(response.GetValue<DroneWebPositionData>(), originLatitude, originLongitude, scaleFactor);
+            DroneData droneData = WebPosToDroneData(response.GetValue<DroneWebPositionData>(), originLatitude, originLongitude, scaleFactor);
             MoveDroneTo(droneData);
         });
 
@@ -59,20 +60,12 @@ public class ServerConnection : MonoBehaviour
     {
         if (socket.Connected)
         {
-            Dictionary<string, DroneWebPositionData> droneDataList = new Dictionary<string, DroneWebPositionData>();
+            List<DroneWebPositionData> droneDataList = new List<DroneWebPositionData>();
 
             for (int i = 0; i < drones.Length; i++)
             {
-                // Extract data from each drone
-                string droneId = i.ToString(); // Use the name of the GameObject as the ID
-                Vector3 position = drones[i].transform.position;
-                float rotation = drones[i].transform.eulerAngles.y;
-
-            
-                DroneWebPositionData droneData = ConvertCoordinatesToLatLon(i, originLatitude,originLongitude,scaleFactor);
-
-                // Add to the dictionary with the drone ID as the key
-                droneDataList[droneId] = droneData;
+                DroneWebPositionData droneData = DroneToWebPos(i, originLatitude,originLongitude,scaleFactor);
+                droneDataList.Add(droneData);
             }
 
             string json = JsonConvert.SerializeObject(droneDataList, Formatting.Indented);
@@ -109,7 +102,7 @@ public class ServerConnection : MonoBehaviour
         }
     }
 
-    public DroneData ConvertLatLonToCoordinates(DroneWebPositionData droneWebData, double originLatitude, double originLongitude, double scaleFactor)
+    public DroneData WebPosToDroneData(DroneWebPositionData droneWebData, double originLatitude, double originLongitude, double scaleFactor)
     {
         if (droneWebData == null)
         {
@@ -132,14 +125,14 @@ public class ServerConnection : MonoBehaviour
                 x = (float)x,
                 y = (float)y,
                 z = drones[droneWebData.id].transform.position.z, // Default Z value (can be updated if needed)
-                rotation = 0 // Default rotation (can be updated if needed)
+                rotation = droneWebData.rotation // Default rotation (can be updated if needed)
             }
         };
     }
 
 
 
-    public DroneWebPositionData ConvertCoordinatesToLatLon(int i, double originLatitude, double originLongitude, double scaleFactor)
+    public DroneWebPositionData DroneToWebPos(int i, double originLatitude, double originLongitude, double scaleFactor)
     {
         GameObject drone = drones[i];
 
@@ -154,10 +147,10 @@ public class ServerConnection : MonoBehaviour
         // Return a new DroneWebPositionData object with converted values
         return new DroneWebPositionData
         {
-            id =  i, // Default ID or customize as needed
+            id = i, // Default ID or customize as needed
             lng = (float)longitude,
-            lat = (float)latitude
-            
+            lat = (float)latitude,
+            rotation = drone.transform.eulerAngles.z,
         };
     }
 
@@ -182,7 +175,7 @@ public class ServerConnection : MonoBehaviour
         public float lng;
         public float lat;
         public float rotation;
-        public float z;
+      
     }
 
 }

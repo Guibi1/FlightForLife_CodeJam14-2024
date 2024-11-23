@@ -8,30 +8,38 @@ public class MoveDrone : MonoBehaviour
     public float startDelay = 0f;         // Optional delay before starting the movement
 
     private Vector3 originalPosition;     // Original position of the GameObject
-
+    private LTDescr tDescr;
     void Start()
     {
         // Store the original position
         originalPosition = transform.position;
 
-        // Start the ping-pong movement after an optional delay
-        if (startDelay > 0f)
-        {
-            LeanTween.delayedCall(gameObject, startDelay, StartPingPong);
-        }
-        else
-        {
-            StartPingPong();
-        }
+       
+        
+        StartPingPong();
+        
     }
 
     // Initiates the ping-pong movement
     void StartPingPong()
     {
+        tDescr.toggle = true;
         Vector3 targetPosition = originalPosition + new Vector3(0, 0, moveDistance);
 
-        LeanTween.move(gameObject, targetPosition, moveDuration)
+         tDescr =  LeanTween.move(gameObject, targetPosition, moveDuration)
             .setEase(LeanTweenType.easeInOutSine)
             .setLoopPingPong(); // This creates a continuous forward and backward loop
     }
+
+    void OnPause()
+    {
+        tDescr.toggle = false;
+   
+    }
+
+    void OnResume()
+    {
+        tDescr.toggle = true;
+    }
+
 }

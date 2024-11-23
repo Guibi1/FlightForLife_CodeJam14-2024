@@ -84,8 +84,10 @@ class UnityNamespace(Namespace):
     
     def on_positions(self,data):
         print(f"Unity /unity 'positions' event: {data}")
-        socketio.emit("message", "Python Server received Drone Positions", namespace="/unity")
+        socketio.emit("drones", data, namespace="/frontend")
 
+ 
+    
     def on_drone_feed(self, data):
         """
         Handle incoming feed from a drone.
@@ -129,6 +131,10 @@ class FrontendNamespace(Namespace):
     def on_message(self, data):
         print(f"Frontend /frontend 'message' event: {data}")
         socketio.emit("response", data, namespace="/frontend")
+
+    def on_request_movement(self,data):
+        print("Frontend: Requesting Movement", data)
+        socketio.emit("move_command", data, namespace="/unity")
 
 
 socketio.on_namespace(UnityNamespace("/unity"))
