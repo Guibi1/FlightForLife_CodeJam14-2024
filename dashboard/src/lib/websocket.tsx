@@ -22,6 +22,7 @@ interface WebSocketProviderProps {
 
 // WebSocket Provider component
 export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }) => {
+    return children;
     const [socket, setSocket] = useState<Socket | null>(null);
     const [messages, setMessages] = useState<string[]>([]);
 
