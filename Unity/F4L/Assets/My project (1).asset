@@ -12,16 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bc8ba17751ad4107a50fa1415017b6b1, type: 3}
   m_Name: My project (1)
   m_EditorClassIdentifier: 
-  automaticStreaming: 1
+  automaticStreaming: 0
   signalingSettings:
-    rid: 2868364676969529344
+    rid: 2868364678892093441
   references:
     version: 2
     RefIds:
-    - rid: 2868364676969529344
+    - rid: 2868364678892093441
       type: {class: WebSocketSignalingSettings, ns: Unity.RenderStreaming, asm: Unity.RenderStreaming}
       data:
-        m_url: ws://127.0.0.1
+        m_url: ws://10.217.2.35:5003
         m_iceServers:
         - m_urls:
           - stun:stun.l.google.com:19302

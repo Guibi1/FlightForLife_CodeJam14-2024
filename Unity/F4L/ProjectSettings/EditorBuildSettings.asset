@@ -7,4 +7,4 @@ EditorBuildSettings:
   m_Scenes: []
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: 305b8d86fd7984f5f83ea139318202bb, type: 2}
-    com.unity.renderstreaming.settings: {fileID: 11400000, guid: eaaad242393318e4f85c45e69c8837f0, type: 2}
+    com.unity.renderstreaming.settings: {fileID: 11400000, guid: fa9282735674a4c4c9e4e9ff7926dd59, type: 2}
