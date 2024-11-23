@@ -24,7 +24,7 @@ public class MoveDrone : MonoBehaviour
     // Initiates the ping-pong movement
     void StartPath()
     {
-        Vector3 targetPosition = originalPosition + new Vector3(0, moveDistance, 0);
+        Vector3 targetPosition = originalPosition + new Vector3(0, 0, moveDistance);
 
         pathDescr = LeanTween.move(gameObject, targetPosition, moveDuration)
            .setEase(LeanTweenType.easeInOutSine)
