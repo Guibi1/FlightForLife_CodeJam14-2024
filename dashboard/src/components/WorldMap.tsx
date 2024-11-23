@@ -52,7 +52,7 @@ export default function WorldMap({
                         variant="secondary"
                         onClick={() => {
                             onDroneSelect(drone);
-                            map?.flyTo({ center: [drone.lng, drone.lat] });
+                            map?.flyTo({ center: [drone.lng, drone.lat], padding: { right: 350 } });
                         }}
                         className="z-10"
                     >
@@ -89,8 +89,8 @@ export default function WorldMap({
                                     ],
                                     base: 2,
                                 },
-                                "circle-color": "rgba(124,58,237,0.2)",
-                                "circle-stroke-color": "rgb(124,58,237)",
+                                "circle-color": drone.alert ? "rgba(127,29,29,0.2)" : "rgba(34,197,94,0.2)",
+                                "circle-stroke-color": drone.alert ? "rgb(127,29,29)" : "rgb(34,197,94)",
                                 "circle-stroke-width": 1,
                             }}
                         />

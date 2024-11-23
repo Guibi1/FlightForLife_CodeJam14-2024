@@ -5,7 +5,9 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { type Socket, io } from "socket.io-client";
 import type { Drone } from "./types";
 
-type Message = { type: "" };
+type Message =
+    | { type: "dismiss-alert"; drone: number; confirmed: boolean }
+    | { type: "request-movement"; lng: number; lat: number };
 type WebSocketContextType = {
     send: (message: Message) => void;
     drones: Drone[];
@@ -20,11 +22,13 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
             id: 1,
             lng: -122.612707,
             lat: 37.926337,
+            alert: false,
         },
         {
             id: 2,
             lng: -122.611007,
             lat: 37.926937,
+            alert: true,
         },
     ]);
 
