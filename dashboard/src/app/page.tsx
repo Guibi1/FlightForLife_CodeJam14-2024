@@ -1,60 +1,66 @@
 "use client";
-import { useWebSocket } from "@/lib/context/websocketContext";
-import Link from "next/link";
+
+import WorldMap from "@/components/WorldMap";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { Drone } from "@/lib/types";
+import { CrosshairIcon } from "lucide-react";
 import { useState } from "react";
+import { useMap } from "react-map-gl";
 
 export default function HomePage() {
-	const { socket, messages } = useWebSocket();
+    const { map } = useMap();
+    const [selectedDrone, selectDrone] = useState<Drone | null>(null);
 
-	const [input, setInput] = useState<string>("");
+    const drones: Drone[] = [
+        {
+            id: 1,
+            lng: -122.612707,
+            lat: 37.926337,
+        },
+        {
+            id: 2,
+            lng: -122.611007,
+            lat: 37.926937,
+        },
+    ];
 
-	const sendMessage = () => {
-		if (socket && input.trim()) {
-			socket.emit("message", { data: input }); // Emit message to Flask backend
-			setInput(""); // Clear input field
-		}
-	};
-	return (
-		<main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">
-			<div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
-				<h1 className="text-5xl font-extrabold tracking-tight text-white sm:text-[5rem]">
-					Create <span className="text-[hsl(280,100%,70%)]">T3</span> App
-				</h1>
-				<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8">
-					<Link
-						className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20"
-						href="https://create.t3.gg/en/usage/first-steps"
-						target="_blank"
-					>
-						<h3 className="text-2xl font-bold">First Steps →</h3>
-						<div className="text-lg">
-							Just the basics - Everything you need to know to set up your
-							database and authentication.
-						</div>
-					</Link>
-					<Link
-						className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20"
-						href="https://create.t3.gg/en/introduction"
-						target="_blank"
-					>
-						<h3 className="text-2xl font-bold">Documentation →</h3>
-						<div className="text-lg">
-							Learn more about Create T3 App, the libraries it uses, and how to
-							deploy it.
-						</div>
-					</Link>
-				</div>
-			</div>
-			<div>
-				<input
-					type="text"
-					value={input}
-					onChange={(e) => setInput(e.target.value)}
-					placeholder="Type your message here"
-				/>
-				<button type="button" onClick={sendMessage}>Send</button>
-                <h1>{input}</h1>
-			</div>
-		</main>
-	);
+    return (
+        <main className="relative flex-1">
+            <div className="absolute inset-0">
+                <WorldMap drones={drones} onDroneSelect={selectDrone} />
+            </div>
+
+            <Card className="absolute inset-y-8 right-8 w-[30rem] h-fit border border-primary bg-background">
+                <CardHeader>
+                    <CardTitle>Flight for life</CardTitle>
+                </CardHeader>
+
+                <CardContent>
+                    <div className="divide-y flex flex-col">
+                        {drones.map((drone) => (
+                            <button
+                                type="button"
+                                className="py-2 px-4 flex items-center justify-between rounded hover:bg-muted transition-[background]"
+                                onClick={() => selectDrone(drone)}
+                                key={drone.id}
+                            >
+                                <p>Drone #{drone.id}</p>
+
+                                {selectedDrone?.id === drone.id && "SELECTED"}
+
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={() => map?.flyTo({ center: [drone.lng, drone.lat], zoom: 18 })}
+                                >
+                                    <CrosshairIcon />
+                                </Button>
+                            </button>
+                        ))}
+                    </div>
+                </CardContent>
+            </Card>
+        </main>
+    );
 }
