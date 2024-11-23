@@ -1,6 +1,5 @@
 using TMPro;
 using UnityEngine;
-using static ServerConnection;
 
 public class MoveDrone : MonoBehaviour
 {
@@ -13,11 +12,12 @@ public class MoveDrone : MonoBehaviour
     private Vector3 pausedPosition;
     private LTDescr pathDescr;
     private LTDescr overrideDescr;
+    private string overrideId;
 
 
     void Start()
     {
-        originalPosition = transform.position;        
+        originalPosition = transform.position;
         StartPath();
     }
 
@@ -26,46 +26,54 @@ public class MoveDrone : MonoBehaviour
     {
         Vector3 targetPosition = originalPosition + new Vector3(0, moveDistance, 0);
 
-         pathDescr =  LeanTween.move(gameObject, targetPosition, moveDuration)
-            .setEase(LeanTweenType.easeInOutSine)
-            .setLoopPingPong(); // This creates a continuous forward and backward loop
+        pathDescr = LeanTween.move(gameObject, targetPosition, moveDuration)
+           .setEase(LeanTweenType.easeInOutSine)
+           .setLoopPingPong(); // This creates a continuous forward and backward loop
     }
 
     public void PauseScanMovements()
     {
         pathDescr.pause();
-   
+
     }
 
     public void ResumeScanMovements()
     {
         if (overrideDescr != null)
         {
+            overrideId = null;
             LeanTween.cancel(overrideDescr.id);
             overrideDescr = LeanTween.move(gameObject, pausedPosition, 2f)
                 .setEase(LeanTweenType.easeInOutSine)
                 .setSpeed(2f).setOnComplete(() => pathDescr.resume());
-
-
-        } else {
+        }
+        else
+        {
             pathDescr.resume();
         }
     }
 
-    public void MoveDroneTo(Vector2 xy)
+    public void MoveDroneTo(Vector2 xy, string id)
     {
         if (overrideDescr != null)
         {
             LeanTween.cancel(overrideDescr.id);
             overrideDescr = null;
-        } else
+        }
+        else
         {
             pathDescr.pause();
             pausedPosition = transform.position;
         }
 
+        overrideId = id;
         float moveSpeed = 2f;
         overrideDescr = LeanTween.move(gameObject, xy, moveSpeed)
             .setEase(LeanTweenType.easeInOutSine).setSpeed(moveSpeed);
+    }
+
+    public string GetOverrideId()
+    {
+        return overrideId;
     }
 }

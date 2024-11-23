@@ -10,7 +10,6 @@ using static ServerConnection;
 public class ServerConnection : MonoBehaviour
 {
     private SocketIOUnity socket;
-    private Dictionary<string, GameObject> movementRequests = new Dictionary<string, GameObject>();
 
     [SerializeField]
     private List<GameObject> drones;
@@ -54,8 +53,7 @@ public class ServerConnection : MonoBehaviour
             Vector2 clickedPos = LngLatToVector(json, originLatitude, originLongitude, scaleFactor);
 
             GameObject drone = drones.OrderBy(drone => Vector2.Distance(clickedPos, drone.transform.position)).First();
-            movementRequests.Add(json.id, drone);
-            drone.GetComponent<MoveDrone>().MoveDroneTo(clickedPos);
+            drone.GetComponent<MoveDrone>().MoveDroneTo(clickedPos, json.id);
         });
 
         socket.OnUnityThread("abort_move_command", response =>
@@ -63,7 +61,7 @@ public class ServerConnection : MonoBehaviour
             AbortMovementRequest json = response.GetValue<AbortMovementRequest>();
             Debug.Log("Abort_Move_Command from server: " + json);
 
-            var drone = movementRequests[json.id];
+            var drone = drones.Where(drone => drone.GetComponent<MoveDrone>().GetOverrideId().Equals(json.id)).First();
             if (drone != null)
             {
                 drone.GetComponent<MoveDrone>().ResumeScanMovements();
