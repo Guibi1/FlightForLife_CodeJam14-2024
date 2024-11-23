@@ -1,4 +1,6 @@
+using TMPro;
 using UnityEngine;
+using static ServerConnection;
 
 public class MoveDrone : MonoBehaviour
 {
@@ -8,30 +10,62 @@ public class MoveDrone : MonoBehaviour
     public float startDelay = 0f;         // Optional delay before starting the movement
 
     private Vector3 originalPosition;     // Original position of the GameObject
+    private Vector3 pausedPosition;
+    private LTDescr pathDescr;
+    private LTDescr overrideDescr;
+
 
     void Start()
     {
-        // Store the original position
-        originalPosition = transform.position;
-
-        // Start the ping-pong movement after an optional delay
-        if (startDelay > 0f)
-        {
-            LeanTween.delayedCall(gameObject, startDelay, StartPingPong);
-        }
-        else
-        {
-            StartPingPong();
-        }
+        originalPosition = transform.position;        
+        StartPath();
     }
 
     // Initiates the ping-pong movement
-    void StartPingPong()
+    void StartPath()
     {
-        Vector3 targetPosition = originalPosition + new Vector3(0, 0, moveDistance);
+        Vector3 targetPosition = originalPosition + new Vector3(0, moveDistance, 0);
 
-        LeanTween.move(gameObject, targetPosition, moveDuration)
+         pathDescr =  LeanTween.move(gameObject, targetPosition, moveDuration)
             .setEase(LeanTweenType.easeInOutSine)
             .setLoopPingPong(); // This creates a continuous forward and backward loop
+    }
+
+    public void PauseScanMovements()
+    {
+        pathDescr.pause();
+   
+    }
+
+    public void ResumeScanMovements()
+    {
+        if (overrideDescr != null)
+        {
+            LeanTween.cancel(overrideDescr.id);
+            overrideDescr = LeanTween.move(gameObject, pausedPosition, 2f)
+                .setEase(LeanTweenType.easeInOutSine)
+                .setSpeed(2f).setOnComplete(() => pathDescr.resume());
+
+
+        } else {
+            pathDescr.resume();
+        }
+    }
+
+    public void MoveDroneTo(Vector2 xy)
+    {
+        if (overrideDescr != null)
+        {
+            LeanTween.cancel(overrideDescr.id);
+            overrideDescr = null;
+        } else
+        {
+            pathDescr.pause();
+            pausedPosition = transform.position;
+        }
+
+        float moveSpeed = 2f;
+        overrideDescr = LeanTween.move(gameObject, xy, moveSpeed)
+            .setEase(LeanTweenType.easeInOutSine).setSpeed(moveSpeed);
     }
 }

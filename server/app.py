@@ -51,6 +51,10 @@ def get_drone(drone_id):
     """
     Fetch the state of a specific drone by its ID.
     """
+
+
+    # return get request from docker ai
+    
     drone_data = drones[drone_id]
     if drone_data:
         return Response(
@@ -81,10 +85,9 @@ class UnityNamespace(Namespace):
     def on_message(self, data):
         print(f"Unity /unity 'message' event: {data}")
         socketio.emit("message", data, namespace="/unity")
-    
-    def on_positions(self,data):
-        print(f"Unity /unity 'positions' event: {data}")
-        socketio.emit("message", "Python Server received Drone Positions", namespace="/unity")
+
+    def on_positions(self, data):
+        socketio.emit("drones", data, namespace="/frontend")
 
     def on_drone_feed(self, data):
         """
@@ -129,6 +132,14 @@ class FrontendNamespace(Namespace):
     def on_message(self, data):
         print(f"Frontend /frontend 'message' event: {data}")
         socketio.emit("response", data, namespace="/frontend")
+
+    def on_request_movement(self, data):
+        print("Frontend: Requesting Movement", data, type(data))
+        socketio.emit("move_command", data, namespace="/unity")
+
+    def on_abort_movement(self, data):
+        print("Frontend: Requesting Movement", data, type(data))
+        socketio.emit("abort_move_command", data, namespace="/unity")
 
 
 socketio.on_namespace(UnityNamespace("/unity"))
