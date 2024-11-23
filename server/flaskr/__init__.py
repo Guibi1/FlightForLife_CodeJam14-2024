@@ -2,13 +2,11 @@ from flask import Flask, render_template
 from flask_socketio import SocketIO
 
 # Initialize SocketIO
-socketio = SocketIO()
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'secret!'
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 def create_app():
-    # Create Flask app instance
-    app = Flask(__name__)
-    app.config['SECRET_KEY'] = 'secret!'
-    
     # Initialize SocketIO with the app
     socketio.init_app(app)
 

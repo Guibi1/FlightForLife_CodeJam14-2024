@@ -12,3 +12,9 @@ def handle_message(data):
 if __name__ == '__main__':
     # Run the app with SocketIO
     socketio.run(app, debug=True)
+
+drones = {}
+def update_drones(drone_id,update):
+    drones.update(drone_id,update)
+
+    
