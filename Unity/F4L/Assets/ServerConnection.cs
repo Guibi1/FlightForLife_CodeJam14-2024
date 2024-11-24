@@ -22,7 +22,7 @@ public class ServerConnection : MonoBehaviour
     void Start()
     {
         Debug.Log("Initializing Socket.IO client...");
-        var uri = new System.Uri("http://10.217.2.35/unity");
+        var uri = new System.Uri("http://10.217.11.176/unity");
         socket = new SocketIOUnity(uri);
         socket.unityThreadScope = UnityThreadScope.Update;
         socket.JsonSerializer = new NewtonsoftJsonSerializer();
@@ -50,9 +50,9 @@ public class ServerConnection : MonoBehaviour
             Debug.Log("Move_Command from server: " + json);
 
 
-            Vector2 clickedPos = LngLatToVector(json, originLatitude, originLongitude, scaleFactor);
+            Vector3 clickedPos = LngLatToVector(json, originLatitude, originLongitude, scaleFactor);
 
-            GameObject drone = drones.OrderBy(drone => Vector2.Distance(clickedPos, drone.transform.position)).First();
+            GameObject drone = drones.OrderBy(drone => Vector3.Distance(clickedPos, drone.transform.position)).First();
             drone.GetComponent<MoveDrone>().MoveDroneTo(clickedPos, json.id);
         });
 
@@ -146,7 +146,7 @@ public class ServerConnection : MonoBehaviour
 
         // Extract x and y from the DroneData object
         double x = drone.transform.position.x;
-        double y = drone.transform.position.y;
+        double y = drone.transform.position.z;
 
         // Convert x, y to latitude and longitude
         double latitude = originLatitude + (y * scaleFactor);
@@ -163,7 +163,7 @@ public class ServerConnection : MonoBehaviour
         };
     }
 
-    public Vector2 LngLatToVector(LngLat ll, double originLatitude, double originLongitude, double scaleFactor)
+    public Vector3 LngLatToVector(LngLat ll, double originLatitude, double originLongitude, double scaleFactor)
     {
         if (ll == null)
         {
@@ -178,7 +178,7 @@ public class ServerConnection : MonoBehaviour
         double x = (ll.lng - originLongitude) * Math.Cos(originLatitude * Math.PI / 180) / scaleFactor;
 
         // Return a new DroneData object with converted values
-        return new Vector2((float)x, (float)y);
+        return new Vector3((float)x, 0,(float)y);
 
     }
 
