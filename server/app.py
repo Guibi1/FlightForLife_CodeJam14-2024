@@ -14,6 +14,7 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 # Dictionary to store drone states and their respective models
 drones = {}
 alerts = []
+alertsFrames = {}
 
 
 # Function to update drone data
@@ -24,38 +25,15 @@ def update_drones(drone_id, human_count):
     socketio.emit("drone_update", {"drone_id": drone_id, "human_count": human_count})
 
 
-@app.route("/drone/<int:drone_id>", methods=["GET"])
-def get_drone(drone_id):
-    """
-    Proxy the stream of a specific drone by its ID.
-    """
-    url = f"http://localhost:{drone_id + 8001}/drone"
-
-    # Perform the request to the second server
-    res = requests.get(url, stream=True)
-
-    # Use stream_with_context to relay the streamed content
-    def generate():
-        for chunk in res.iter_content(chunk_size=1024):
-            if chunk:
-                yield chunk
-
-    return Response(
-        stream_with_context(generate()),
-        content_type="multipart/x-mixed-replace; boundary=frame",
-    )
-
-
 @app.route("/alert", methods=["POST"])
 def post_alert():
     data = request.json
     print("Got alert for " + str(data["drone"]))
 
-    if data["drone"] in alerts:
-        # openai_vision.getGPTResponseToHelper(data["frame"])
-        socketio.emit("drone_pause", {"drone": data["drone"]}, namespace="/unity")
-    else:
+    if data["drone"] not in alerts:
         alerts.append(data["drone"])
+        alertsFrames[data["drone"]] = data["frame"]
+        socketio.emit("drone_pause", {"drone": data["drone"]}, namespace="/unity")
 
     return Response()
 
@@ -113,18 +91,21 @@ class FrontendNamespace(Namespace):
 
     def on_dismiss_alert(self, data):
         print("Frontend: Dismissing Alerts", data)
+
+        alerts.remove(data["drone"])
         if data["confirmed"]:
             socketio.emit(
                 "move_command",
                 {
-                    "lng": drones[data["drone"]].lng,
-                    "lat": drones[data["drone"]].lat,
-                    "id": "rescue" + data["drone"],
+                    "lng": drones[data["drone"]]["lng"],
+                    "lat": drones[data["drone"]]["lat"],
+                    "id": "rescue" + str(data["drone"]),
                 },
                 namespace="/unity",
             )
+            openai_vision.getGPTResponseToHelper(alertsFrames[data["drone"]], drones[data["drone"]])
+            del alertsFrames[data["drone"]]
         else:
-            alerts.remove(data["drone"])
             socketio.emit("drone_go", {"drone": data["drone"]}, namespace="/unity")
 
 

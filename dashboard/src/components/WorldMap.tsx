@@ -37,7 +37,7 @@ export default function WorldMap({ onDroneSelect }: { onDroneSelect: (drone: Dro
                 longitude: -0.375984,
                 latitude: 39.47132,
                 zoom: 16,
-                pitch: 60,
+                pitch: 20,
             }}
             mapStyle="mapbox://styles/guibi/cm3tlr9vo00hc01rwbr7ga0us"
             onClick={(e) => setPointClicked(e.lngLat)}
@@ -90,7 +90,7 @@ export default function WorldMap({ onDroneSelect }: { onDroneSelect: (drone: Dro
                                 "circle-radius": {
                                     stops: [
                                         [0, 0],
-                                        [20, 800],
+                                        [20, 200],
                                     ],
                                     base: 2,
                                 },

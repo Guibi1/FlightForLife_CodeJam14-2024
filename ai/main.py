@@ -10,6 +10,7 @@ app = Flask(__name__)
 
 # Load a YOLO model
 model = YOLO("yolo11m.pt")  # Replace with your model
+frame_with_humain_box = None
 
 # Define connection URL
 SERVER_ALERT_ENDPOINT = "http://host.docker.internal/alert"
@@ -27,6 +28,7 @@ def filter_and_display(frame, detections):
     """
     Filter detections to show only 'person' and display them on the frame.
     """
+    global frame_with_humain_box
     human_detected = False
     for box in detections:
         if int(box.cls[0]) == 0:  # Class ID for 'person' is 0 in YOLO's COCO dataset
@@ -46,6 +48,7 @@ def filter_and_display(frame, detections):
     # If a human is detected, send data to the Socket.IO server
     if human_detected:
         print("Sending")
+        frame_with_humain_box = frame
         frame_string = encode_frame(frame)
         try:
             requests.post(SERVER_ALERT_ENDPOINT, json={"drone": int(os.getenv("DRONE") or 0), "frame": frame_string})
@@ -57,26 +60,13 @@ def filter_and_display(frame, detections):
 
 @app.route("/drone", methods=["GET"])
 def get_drone():
-    """
-    Fetch the state of a specific drone by its ID.
-    """
+    if "frame_with_humain_box" in globals() and frame_with_humain_box is not None:
+        ret, buffer = cv2.imencode(".jpg", frame_with_humain_box)
+        frame_data = buffer.tobytes()
 
-    def generate_frames():
-        while True:
-            if "frame" in globals() and frame is not None:
-                ret, buffer = cv2.imencode(".jpg", frame)
-                frame_data = buffer.tobytes()
-                yield (
-                    b"--frame\r\n"
-                    b"Content-Type: image/jpeg\r\n\r\n" + frame_data + b"\r\n"
-                )
-            else:
-                yield (b"--frame\r\n" b"Content-Type: text/plain\r\n\r\nNo data\r\n")
-
-    return Response(
-        generate_frames(), mimetype="multipart/x-mixed-replace; boundary=frame"
-    )
-
+        return Response(frame_data, mimetype="image/jpeg")
+    else:
+        return Response()
 
 def model_inference():
     global frame

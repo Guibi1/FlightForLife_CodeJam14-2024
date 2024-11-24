@@ -1,5 +1,12 @@
 version: "3.8"
 services:
+  server:
+    build: ./server
+    networks:
+      - custom_network
+    ports:
+      - "80:80"
+
   drone1:
     build: ./ai
     networks:
