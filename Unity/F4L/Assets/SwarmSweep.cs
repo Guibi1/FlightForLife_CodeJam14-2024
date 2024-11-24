@@ -12,8 +12,9 @@ public class SwarmSweep : MonoBehaviour
 
         for (int i = 0; i < sc.drones.Count; i++)
         {
-            sc.drones[i].transform.position = new Vector3(0, 10, (float)(gap * (i + 0.5)));
-            sc.drones[i].GetComponent<MoveDrone>().StartPath(transform.position + new Vector3(size, 10, (float)(gap * (i + 0.5))));
+            Vector3 pos = new Vector3(-22, 10, (float)(gap * (i + 0.5)));
+            sc.drones[i].transform.position = pos;
+            sc.drones[i].GetComponent<MoveDrone>().StartPath(pos + new Vector3(size, 0, 0));
         }
     }
 }

@@ -17,7 +17,7 @@ client = OpenAI(api_key=OPENAI_SECRET_KEY)
 twilio_client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_KEY)
 
 
-def getGPTResponseToHelper(base64_image,drone_data):
+def getGPTResponseToHelper(base64_image, droneLngLat):
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
@@ -45,10 +45,10 @@ def getGPTResponseToHelper(base64_image,drone_data):
         ],
     )
 
-    sendSMSwithTwilio(response.choices[0].message.content, base64_image,drone_data)
+    sendSMSwithTwilio(response.choices[0].message.content, base64_image, droneLngLat)
 
 
-def sendSMSwithTwilio(response, base64_image,drone_data):
+def sendSMSwithTwilio(response, base64_image, droneLngLat):
     url = "https://api.imgbb.com/1/upload"
     payload = {
         "key": key_imgbb,
@@ -58,7 +58,7 @@ def sendSMSwithTwilio(response, base64_image,drone_data):
 
     message = twilio_client.messages.create(
         from_="+19788296846",
-        body=f"{response} At Location: {drone_data.lng},{drone_data.lat}",
+        body=f"Someone needs your immediate assistance at ({droneLngLat["lng"]}, {droneLngLat["lat"]}): {response}",
         to="+14385301061",
         media_url=[res.json()["data"]["url"]],
     )
