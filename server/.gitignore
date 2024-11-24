@@ -1,0 +1,91 @@
+# Byte-compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment directories
+venv/
+env/
+
+# Cache and log files
+*.log
+*.pot
+*.pyc
+*.pyo
+*.pyd
+*.pdb
+*.egg-info/
+.eggs/
+
+# Environment variable files
+.env
+*.env
+
+# Database and settings
+*.sqlite3
+*.db
+
+# Package manager directories
+pip-wheel-metadata/
+*.egg
+
+# IDE-specific files
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# pytest cache
+.cache/
+
+# Coverage reports
+htmlcov/
+.coverage
+*.cover
+*.py,cover
+
+# Build artifacts
+build/
+dist/
+*.egg
+*.manifest
+*.spec
+
+# Distribution packaging
+*.wheel
+*.egg-info/
+.installed.cfg
+
+# Test artifacts
+.tox/
+.nox/
+*.test
+*.tests
+
+# Temporary files
+*.bak
+*.swp
+*.tmp
+*.temp
+~*
+
+# Documentation builds
+/docs/_build/
+
+# C Extensions
+*.so
+
+# Static files
+staticfiles/
+media/
+
+# Other Python project-specific ignores
+migrations/
+
