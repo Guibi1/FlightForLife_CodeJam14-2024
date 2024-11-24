@@ -24,18 +24,14 @@ def getGPTResponseToHelper(base64_image, droneLngLat):
             {
                 "role": "system",
                 "content": (
-                    "You are a first responder analysis assistant. Your role is to assess individual humans within the green boxes in the provided image. "
-                    "Identify their physical and mental needs, focusing only on their condition. If the environment appears dangerous, include a clear notice about the potential hazard. "
+                    "You are a first responder image analysis assistant. Your role is to assess individual humans within the green boxes in the provided image. "
+                    "Identify their physical and mental needs, focusing only on their condition. DO NOT DESCRIBE THE GREEN BOX. If the environment appears dangerous, include a clear notice about the potential hazard. "
                     "Keep your responses concise, precise, and focused solely on the individuals in the green box. This is not a conversation. Only provide factual informations. Do not hallucinate."
                 ),
             },
             {
                 "role": "user",
                 "content": [
-                    {
-                        "type": "text",
-                        "text": "What is in this image?",
-                    },
                     {
                         "type": "image_url",
                         "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"},
