@@ -374,11 +374,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 484234481}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e5eb34f07070c47a8b54aa04896a205d, type: 3}
+  m_Script: {fileID: 11500000, guid: 2adf2dc465e274dab9075fdf1219a293, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveDistance: 10
-  moveDuration: 4
+  moveDuration: 2
   startDelay: 0
 --- !u!1001 &491175384
 PrefabInstance:
@@ -1081,11 +1080,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1065123090}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e5eb34f07070c47a8b54aa04896a205d, type: 3}
+  m_Script: {fileID: 11500000, guid: 2adf2dc465e274dab9075fdf1219a293, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveDistance: 10
-  moveDuration: 4
+  moveDuration: 2
   startDelay: 0
 --- !u!1001 &1132267966
 PrefabInstance:
@@ -1333,11 +1331,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1720472487}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e5eb34f07070c47a8b54aa04896a205d, type: 3}
+  m_Script: {fileID: 11500000, guid: 2adf2dc465e274dab9075fdf1219a293, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveDistance: 10
-  moveDuration: 10
+  moveDuration: 2
   startDelay: 0
 --- !u!21 &1766127953
 Material:
