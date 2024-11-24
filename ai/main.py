@@ -12,7 +12,7 @@ app = Flask(__name__)
 model = YOLO("yolo11m.pt")  # Replace with your model
 
 # Define connection URL
-SERVER_ALERT_ENDPOINT = "http://localhost/alert"
+SERVER_ALERT_ENDPOINT = "http://host.docker.internal/alert"
 
 
 def encode_frame(frame):
@@ -47,7 +47,10 @@ def filter_and_display(frame, detections):
     if human_detected:
         print("Sending")
         frame_string = encode_frame(frame)
-        requests.post(SERVER_ALERT_ENDPOINT, json={"drone": 1, "frame": frame_string})
+        try:
+            requests.post(SERVER_ALERT_ENDPOINT, json={"drone": int(os.getenv("DRONE") or 0), "frame": frame_string})
+        except:
+            print("Couldn't send")
 
     return frame
 
@@ -77,7 +80,7 @@ def get_drone():
 
 def model_inference():
     global frame
-    results = model.track(source=os.get_env("SOURCE_URL"), stream=True)
+    results = model.track(source=os.getenv("SOURCE_URL"), stream=True)
     for result in results:
         frame = result.orig_img
         detections = result.boxes

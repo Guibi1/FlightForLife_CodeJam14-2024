@@ -108,11 +108,11 @@ export default function HomePage() {
                                                 <div className="relative h-64 grid place-items-center overflow-hidden rounded mb-4">
                                                     <Loader2Icon className="animate-spin" />
 
-                                                    <img
+                                                    {selectedDrone.id === drone.id && <img
                                                         className="absolute inset-0"
                                                         src={`${env.NEXT_PUBLIC_SERVER_URL}/drone/${drone.id}`}
                                                         alt="drone video stream"
-                                                    />
+                                                    />}
                                                 </div>
 
                                                 <div className="flex gap-2">

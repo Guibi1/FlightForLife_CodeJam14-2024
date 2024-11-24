@@ -59,7 +59,7 @@ def sendSMSwithTwilio(response, base64_image):
     message = twilio_client.messages.create(
         from_="+19788296846",
         body=f"{response}",
-        to="+14383890928",
+        to="+14385301061",
         media_url=[res.json()["data"]["url"]],
     )
 
