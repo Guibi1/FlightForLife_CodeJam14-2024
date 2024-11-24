@@ -12,7 +12,7 @@ services:
     networks:
       - custom_network
     environment:
-      - SOURCE_URL=http://host.docker.internal:8080/cameras/0
+      - SOURCE_URL=http://10.217.7.149:8080/cameras/0
       - DRONE=0
     ports:
       - "8001:8000"
@@ -22,7 +22,7 @@ services:
     networks:
       - custom_network
     environment:
-      - SOURCE_URL=http://host.docker.internal:8080/cameras/1
+      - SOURCE_URL=http://10.217.7.149:8080/cameras/1
       - DRONE=1
     ports:
       - "8002:8000"
@@ -32,7 +32,7 @@ services:
     networks:
       - custom_network
     environment:
-      - SOURCE_URL=http://host.docker.internal:8080/cameras/2
+      - SOURCE_URL=http://10.217.7.149:8080/cameras/2
       - DRONE=2
     ports:
       - "8003:8000"
@@ -42,7 +42,7 @@ services:
   #   networks:
   #     - custom_network
   #   environment:
-  #     - SOURCE_URL=http://host.docker.internal:8080/cameras/3
+  #     - SOURCE_URL=http://10.217.7.149:8080/cameras/3
   #     - DRONE=3
   #   ports:
   #     - "8004:8000"
@@ -52,7 +52,7 @@ services:
   #   networks:
   #     - custom_network
   #   environment:
-  #     - SOURCE_URL=http://host.docker.internal:8080/cameras/4
+  #     - SOURCE_URL=http://10.217.7.149:8080/cameras/4
   #     - DRONE=4
   #   ports:
   #     - "8005:8000"

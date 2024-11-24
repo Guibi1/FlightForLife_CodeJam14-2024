@@ -11,11 +11,11 @@ import { useWebSocket } from "@/lib/websocket";
 import clsx from "clsx";
 import { AnimatePresence, motion } from "framer-motion";
 import {
-	CrosshairIcon,
-	EyeClosedIcon,
-	LifeBuoyIcon,
-	Loader2Icon,
-	TriangleAlertIcon,
+  CrosshairIcon,
+  EyeClosedIcon,
+  LifeBuoyIcon,
+  Loader2Icon,
+  TriangleAlertIcon,
 } from "lucide-react";
 import { useState } from "react";
 import { useMap } from "react-map-gl";
@@ -117,13 +117,19 @@ export default function HomePage() {
                                             <div className="relative h-64 grid place-items-center overflow-hidden rounded mb-4">
                                                 <Loader2Icon className="animate-spin" />
 
-                                                {selectedDrone.id === drone.id && (
+                                                {selectedDrone.id === drone.id && (!drone.overriten && drone.alert ?
                                                     <img
                                                         className="absolute inset-0"
                                                         src={`${env.NEXT_PUBLIC_SERVER_URL}:${drone.id + 8001}/drone`}
                                                         alt="drone video stream"
                                                     />
-                                                )}
+                                                : (
+                                                    <img
+                                                        className="absolute inset-0"
+                                                        src={`${env.NEXT_PUBLIC_UNITY_URL}/cameras/${drone.id}`}
+                                                        alt="drone video stream"
+                                                    />
+                                                ))}
                                             </div>
 
                                             <div className="flex gap-2">
@@ -148,7 +154,7 @@ export default function HomePage() {
 
                                                 <div className="w-full" />
 
-                                                {drone.alert && (
+                                                {!drone.overriten && drone.alert && (
                                                     <Button
                                                         onClick={() =>
                                                             send({
@@ -163,7 +169,7 @@ export default function HomePage() {
                                                     </Button>
                                                 )}
 
-                                                {drone.alert && (
+                                                {!drone.overriten && drone.alert && (
                                                     <Button
                                                         variant="destructive"
                                                         onClick={() =>
