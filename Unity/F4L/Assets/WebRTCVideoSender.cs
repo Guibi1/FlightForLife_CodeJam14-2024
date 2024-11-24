@@ -44,13 +44,6 @@ public class CameraStreamServer : MonoBehaviour
 
     void Start()
     {
-        // Ensure exactly 5 cameras are assigned
-        if (cameras.Count != 5)
-        {
-            Debug.LogError("CameraStreamServer: Exactly 5 cameras must be assigned in the Inspector.");
-            return;
-        }
-
         InitializeCameraStreams();
 
         // Start the HTTP server
