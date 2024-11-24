@@ -90,7 +90,7 @@ export default function WorldMap({ onDroneSelect }: { onDroneSelect: (drone: Dro
                                 "circle-radius": {
                                     stops: [
                                         [0, 0],
-                                        [20, 800],
+                                        [20, 200],
                                     ],
                                     base: 2,
                                 },
