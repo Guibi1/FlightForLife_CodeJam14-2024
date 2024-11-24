@@ -22,6 +22,7 @@ public class MoveDrone : MonoBehaviour
     {
         pathDescr = LeanTween.move(gameObject, targetPosition, moveDuration)
            .setEase(LeanTweenType.easeInOutSine)
+           .setSpeed(10f)
            .setLoopPingPong(); // This creates a continuous forward and backward loop
     }
 
@@ -40,7 +41,7 @@ public class MoveDrone : MonoBehaviour
             LeanTween.cancel(overrideDescr.id);
             overrideDescr = LeanTween.move(gameObject, pausedPosition, 20f)
                 .setEase(LeanTweenType.easeInOutSine)
-                .setSpeed(2f).setOnComplete(() => { pathDescr.resume(); overrideDescr = null; });
+                .setSpeed(10f).setOnComplete(() => { pathDescr.resume(); overrideDescr = null; });
         }
         else
         {
@@ -62,7 +63,7 @@ public class MoveDrone : MonoBehaviour
         }
 
         overrideId = id;
-        float moveSpeed = 2f;
+        float moveSpeed = 10f;
         overrideDescr = LeanTween.move(gameObject, xy, moveSpeed)
             .setEase(LeanTweenType.easeInOutSine).setSpeed(moveSpeed);
     }

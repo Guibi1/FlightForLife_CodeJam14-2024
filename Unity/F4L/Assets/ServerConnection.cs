@@ -16,7 +16,7 @@ public class ServerConnection : MonoBehaviour
  
     private const double originLatitude = 39.47132; 
     private const double originLongitude = -0.375984;
-    private const double scaleFactor = 0.0001;
+    private const double scaleFactor = 0.00001;
 
 
     void Start()
