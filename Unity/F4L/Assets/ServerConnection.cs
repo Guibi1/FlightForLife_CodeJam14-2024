@@ -12,17 +12,17 @@ public class ServerConnection : MonoBehaviour
     private SocketIOUnity socket;
 
     [SerializeField]
-    private List<GameObject> drones;
-
-    private const double originLatitude = 37.926337; 
-    private const double originLongitude = -122.612707;
+    public List<GameObject> drones;
+ 
+    private const double originLatitude = 39.47132; 
+    private const double originLongitude = -0.375984;
     private const double scaleFactor = 0.0001;
 
 
     void Start()
     {
         Debug.Log("Initializing Socket.IO client...");
-        var uri = new System.Uri("http://localhost:5000/unity");
+        var uri = new System.Uri("http://10.217.2.35/unity");
         socket = new SocketIOUnity(uri);
         socket.unityThreadScope = UnityThreadScope.Update;
         socket.JsonSerializer = new NewtonsoftJsonSerializer();
@@ -73,7 +73,7 @@ public class ServerConnection : MonoBehaviour
             PauseGoRequest json = response.GetValue<PauseGoRequest>();
             Debug.Log("Pause_Command from server: " + json);
 
-            
+
             if (drones[json.drone] != null)
             {
                 drones[json.drone].GetComponent<MoveDrone>().PauseScanMovements();
@@ -179,7 +179,7 @@ public class ServerConnection : MonoBehaviour
 
         // Return a new DroneData object with converted values
         return new Vector2((float)x, (float)y);
-        
+
     }
 
 
@@ -232,6 +232,5 @@ public class ServerConnection : MonoBehaviour
         public int drone;
     }
 
-    
-}
 
+}

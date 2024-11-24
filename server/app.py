@@ -1,10 +1,13 @@
 import json
-from flask import Flask, Response
+from flask import Flask, Response, request
 from flask_socketio import SocketIO, Namespace
+from flask_cors import CORS
 import requests
+import openai_vision
 
 # Create Flask app and SocketIO instance
 app = Flask(__name__)
+CORS(app, origins="*")
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 
@@ -27,10 +30,20 @@ def get_drone(drone_id):
     Fetch the state of a specific drone by its ID.
     """
 
-    url = "http://localhost:" + (drone_id + 8001) + "/drone"
+    url = "http://localhost:" + str(drone_id + 8001) + "/drone"
 
     res = requests.get(url)
     return Response(res, mimetype="multipart/x-mixed-replace; boundary=frame")
+
+
+@app.route("/alert", methods=["POST"])
+def post_alert():
+    data = request.json
+    print("Got alert for " + str(data["drone"]))
+    openai_vision.getGPTResponseToHelper(data["frame"])
+    socketio.emit("drone_pause", {"drone": data["drone"]}, namespace="/unity")
+
+    return Response()
 
 
 # Namespace for Unity
@@ -47,7 +60,7 @@ class UnityNamespace(Namespace):
 
     def on_positions(self, data):
         data = json.loads(data)
-        # print(data, type(data))
+        #print(data, type(data))
 
         global drones
 
@@ -101,30 +114,10 @@ class FrontendNamespace(Namespace):
             socketio.emit("drone_go", {"drone": data.drone}, namespace="/unity")
 
 
-class AiNamespace(Namespace):
-    def on_connect(self):
-        print("Frontend client connected to /frontend")
-
-    def on_disconnect(self):
-        print("Frontend client disconnected from /frontend")
-
-    def on_message(self, data):
-        print(f"Frontend /frontend 'message' event: {data}")
-        socketio.emit("response", data, namespace="/frontend")
-
-    def on_drone_ai_alert(self, drone_id):
-        print(f"Unity /unity 'drone_ai_abort' event: {drone_id}")
-        socketio.emit("drone_pause", {"drone": drone_id}, namespace="/unity")
-
-    def on_drone_feed(self, data):
-        print(data)
-
-
 socketio.on_namespace(UnityNamespace("/unity"))
 socketio.on_namespace(FrontendNamespace("/frontend"))
-socketio.on_namespace(FrontendNamespace("/ai"))
 
 
 if __name__ == "__main__":
     # Run the Flask app with SocketIO
-    socketio.run(app, host="0.0.0.0", port=5000, debug=True)
+    socketio.run(app, host="0.0.0.0", port=80, debug=True)
