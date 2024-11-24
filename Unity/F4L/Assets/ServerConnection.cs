@@ -6,6 +6,7 @@ using static SocketIOUnity;
 using SocketIOClient.Newtonsoft.Json;
 using System.Linq;
 using static ServerConnection;
+using System.IO; // Namespace for file operations
 
 public class ServerConnection : MonoBehaviour
 {
@@ -14,15 +15,14 @@ public class ServerConnection : MonoBehaviour
     [SerializeField]
     public List<GameObject> drones;
  
-    private const double originLatitude = 39.47132; 
-    private const double originLongitude = -0.375984;
+    private const double originLatitude = 39.473; 
+    private const double originLongitude = -0.3763;
     private const double scaleFactor = 0.00001;
-
-
     void Start()
     {
         Debug.Log("Initializing Socket.IO client...");
-        var uri = new System.Uri("http://10.217.11.176/unity");
+
+        var uri = new System.Uri("http://10.217.2.35/unity");
         socket = new SocketIOUnity(uri);
         socket.unityThreadScope = UnityThreadScope.Update;
         socket.JsonSerializer = new NewtonsoftJsonSerializer();

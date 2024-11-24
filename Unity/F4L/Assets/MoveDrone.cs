@@ -62,6 +62,7 @@ public class MoveDrone : MonoBehaviour
             pausedPosition = transform.position;
         }
 
+        xy.y = gameObject.transform.position.y;
         overrideId = id;
         overrideDescr = LeanTween.move(gameObject, xy, 0f)
             .setEase(LeanTweenType.easeInOutSine).setSpeed(speed);
